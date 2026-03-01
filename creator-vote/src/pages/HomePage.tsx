@@ -18,6 +18,7 @@ const CREATORS = Array.from({ length: 30 }, (_, index) => {
 const HomePage: React.FC = () => {
   const maxVotes = USER_STATUS.remainingVotes;
   const [selectedIds, setSelectedIds] = React.useState<number[]>([]);
+  const cardRadiusClass = 'rounded-2xl';
 
   const toggleSelect = (id: number) => {
     setSelectedIds(prev => {
@@ -54,7 +55,7 @@ const HomePage: React.FC = () => {
       />
 
       <div className="relative z-10 flex min-h-screen flex-col">
-        <header className="sticky top-0 z-20 border-b border-gray-200 bg-white/70 backdrop-blur">
+        <header className="fixed inset-x-0 top-0 z-20 border-b border-gray-200 bg-white/70 backdrop-blur">
           <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
             <div className="flex items-center gap-3">
               <img
@@ -69,7 +70,7 @@ const HomePage: React.FC = () => {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-28">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-24 pb-28">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {CREATORS.map(creator => {
               const isSelected = selectedIds.includes(creator.id);
@@ -80,13 +81,13 @@ const HomePage: React.FC = () => {
                   key={creator.id}
                   type="button"
                   onClick={() => toggleSelect(creator.id)}
-                  className={`text-left rounded-xl bg-white shadow-sm transition hover:shadow-md ${
+                  className={`text-left ${cardRadiusClass} bg-white shadow-sm transition hover:shadow-md ${
                     isSelected
                       ? 'border-[3px] border-[#FF69B4] ring-2 ring-[#FF69B4]/60'
                       : 'border border-gray-200'
                   } ${isDisabled ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}
                 >
-                  <div className="overflow-hidden rounded-lg">
+                  <div className="overflow-hidden rounded-t-2xl">
                     <img
                       src={creator.imageUrl}
                       alt={creator.name}
@@ -104,7 +105,7 @@ const HomePage: React.FC = () => {
         </main>
 
         {selectedIds.length > 0 && (
-          <div className="fixed bottom-0 inset-x-0 z-30 border-t border-gray-200 bg-white/95 backdrop-blur">
+          <div className="fixed bottom-0 inset-x-0 z-30 border-t border-gray-200 bg-white/70 backdrop-blur">
             <div className="mx-auto flex w-full max-w-6xl justify-center px-4 py-4">
               <button
                 type="button"
