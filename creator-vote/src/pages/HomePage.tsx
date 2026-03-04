@@ -1,25 +1,12 @@
 import React from 'react';
 
+import { fetchCreators } from '../services/creatorService';
+import { Creator } from '../types/creator';
+
 const USER_STATUS = {
   loggedIn: true,
   remainingVotes: 5,
 };
-
-type Creator = {
-  id: string;
-  displayName: string;
-  imageUrl: string;
-  updatedAt: string;
-};
-
-const API_PATH = '/creators';
-const DEFAULT_API_BASE =
-  process.env.NODE_ENV === 'production'
-    ? 'https://us-central1-adultopia-creator-vote.cloudfunctions.net/api'
-    : 'http://127.0.0.1:5001/adultopia-creator-vote/us-central1/api';
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL?.replace(/\/$/, '') ?? DEFAULT_API_BASE;
-const API_ENDPOINT = `${API_BASE_URL}${API_PATH}`;
 
 const HomePage: React.FC = () => {
   const maxVotes = USER_STATUS.remainingVotes;
@@ -33,30 +20,13 @@ const HomePage: React.FC = () => {
   React.useEffect(() => {
     const controller = new AbortController();
 
-    const fetchCreators = async () => {
+    const loadCreators = async () => {
       setIsLoading(true);
       setErrorMessage(null);
 
       try {
-        const response = await fetch(API_ENDPOINT, { signal: controller.signal });
-
-        if (!response.ok) {
-          const previewText = await response.text().catch(() => null);
-          const details = previewText ? `: ${previewText.slice(0, 120)}` : '';
-          throw new Error(`クリエイターの取得に失敗しました (status ${response.status})${details}`);
-        }
-
-        const contentType = response.headers.get('content-type') ?? '';
-        if (!contentType.includes('application/json')) {
-          const previewText = await response.text().catch(() => null);
-          const preview = previewText ? `: ${previewText.slice(0, 120)}` : '';
-          throw new Error(`JSON ではないレスポンスを受信しました${preview}`);
-        }
-
-        const data: Creator[] = await response.json();
-        const sorted = [...data].sort(
-          (a, b) => new Date(b.updatedAt).valueOf() - new Date(a.updatedAt).valueOf(),
-        );
+        const data = await fetchCreators({ signal: controller.signal });
+        const sorted = [...data].sort((a, b) => b.totalVoteCount - a.totalVoteCount);
 
         setCreators(sorted);
       } catch (error) {
@@ -71,7 +41,7 @@ const HomePage: React.FC = () => {
       }
     };
 
-    fetchCreators();
+    loadCreators();
 
     return () => controller.abort();
   }, [refreshToken]);
@@ -138,14 +108,14 @@ const HomePage: React.FC = () => {
     return (
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {creators.map(creator => {
-          const isSelected = selectedIds.includes(creator.id);
+          const isSelected = selectedIds.includes(creator.creatorId);
           const isDisabled = reachedLimit && !isSelected;
 
           return (
             <button
-              key={creator.id}
+              key={creator.creatorId}
               type="button"
-              onClick={() => toggleSelect(creator.id)}
+              onClick={() => toggleSelect(creator.creatorId)}
               className={`text-left ${cardRadiusClass} bg-white shadow-sm transition hover:shadow-md ${
                 isSelected
                   ? 'border-[3px] border-[#FF69B4] ring-2 ring-[#FF69B4]/60'
@@ -162,7 +132,7 @@ const HomePage: React.FC = () => {
               <div className="px-3 py-3">
                 <h3 className="text-sm font-semibold text-gray-800 md:text-base">{creator.displayName}</h3>
                 <p className="text-xs text-gray-500 md:text-sm">
-                  更新: {new Date(creator.updatedAt).toLocaleDateString()}
+                  累計投票数: {creator.totalVoteCount.toLocaleString()}
                 </p>
               </div>
             </button>
