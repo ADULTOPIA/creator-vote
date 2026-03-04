@@ -1,26 +1,26 @@
-import { mockFetchCreators } from '../mocks/creators';
-import { Creator } from '../types/creator';
+import { mockFetchUserVotesToday } from '../mocks/userVotes';
+import { UserVotesTodayResponse } from '../types/userVotes';
 
 import { API_BASE_URL, shouldUseMockApi } from './apiConfig';
 
-const API_PATH = '/creators';
+const API_PATH = '/user/votes/today';
 const API_ENDPOINT = `${API_BASE_URL}${API_PATH}`;
 
-type FetchCreatorsOptions = {
+type FetchUserVotesTodayOptions = {
   signal?: AbortSignal;
 };
 
-export const fetchCreators = async ({ signal }: FetchCreatorsOptions = {}): Promise<Creator[]> => {
+export const fetchUserVotesToday = async ({ signal }: FetchUserVotesTodayOptions = {}): Promise<UserVotesTodayResponse> => {
   if (shouldUseMockApi) {
-    return mockFetchCreators({ signal });
+    return mockFetchUserVotesToday({ signal });
   }
 
-  const response = await fetch(API_ENDPOINT, { signal });
+  const response = await fetch(API_ENDPOINT, { signal, headers: { 'Content-Type': 'application/json' } });
 
   if (!response.ok) {
     const previewText = await response.text().catch(() => null);
     const details = previewText ? `: ${previewText.slice(0, 120)}` : '';
-    throw new Error(`クリエイターの取得に失敗しました (status ${response.status})${details}`);
+    throw new Error(`本日の投票履歴の取得に失敗しました (status ${response.status})${details}`);
   }
 
   const contentType = response.headers.get('content-type') ?? '';
@@ -30,6 +30,6 @@ export const fetchCreators = async ({ signal }: FetchCreatorsOptions = {}): Prom
     throw new Error(`JSON ではないレスポンスを受信しました${preview}`);
   }
 
-  const payload = (await response.json()) as Creator[];
+  const payload = (await response.json()) as UserVotesTodayResponse;
   return payload;
 };
