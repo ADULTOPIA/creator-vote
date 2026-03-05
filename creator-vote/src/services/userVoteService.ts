@@ -1,21 +1,24 @@
-import { mockFetchUserVotesToday } from '../mocks/userVotes';
 import { UserVotesTodayResponse } from '../types/userVotes';
 
-import { API_BASE_URL, shouldUseMockApi } from './apiConfig';
+import { API_BASE_URL } from './apiConfig';
 
 const API_PATH = '/user/votes/today';
 const API_ENDPOINT = `${API_BASE_URL}${API_PATH}`;
 
 type FetchUserVotesTodayOptions = {
   signal?: AbortSignal;
+  /** Firebase ID token — required when calling the real API */
+  idToken?: string;
 };
 
-export const fetchUserVotesToday = async ({ signal }: FetchUserVotesTodayOptions = {}): Promise<UserVotesTodayResponse> => {
-  if (shouldUseMockApi) {
-    return mockFetchUserVotesToday({ signal });
+export const fetchUserVotesToday = async ({ signal, idToken }: FetchUserVotesTodayOptions = {}): Promise<UserVotesTodayResponse> => {
+
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (idToken) {
+    headers['Authorization'] = `Bearer ${idToken}`;
   }
 
-  const response = await fetch(API_ENDPOINT, { signal, headers: { 'Content-Type': 'application/json' } });
+  const response = await fetch(API_ENDPOINT, { signal, headers });
 
   if (!response.ok) {
     const previewText = await response.text().catch(() => null);

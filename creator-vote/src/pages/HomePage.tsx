@@ -1,22 +1,27 @@
 import React from 'react';
 
+import { useAuth } from '../contexts/AuthContext';
 import { fetchCreators } from '../services/creatorService';
 import { fetchUserVotesToday } from '../services/userVoteService';
+import { submitVotes, VoteApiError } from '../services/voteService';
 import { Creator } from '../types/creator';
 
-const USER_STATUS = {
-  loggedIn: true,
-  remainingVotes: 5,
-};
-
 const HomePage: React.FC = () => {
-  const maxVotes = USER_STATUS.remainingVotes;
+  const { user, loading: authLoading, loginInfo, signInWithGoogle, getIdToken, refreshLoginInfo, loginError, clearLoginError } = useAuth();
+
+  const dayVotes = loginInfo?.dayVotes ?? 5;
+  const usedVotes = loginInfo?.usedVotes ?? 0;
+  const isBlocked = loginInfo?.isBlocked ?? false;
+  const maxVotes = dayVotes;
+
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
   const [lockedIds, setLockedIds] = React.useState<string[]>([]);
   const [creators, setCreators] = React.useState<Creator[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [refreshToken, setRefreshToken] = React.useState(0);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [submitMessage, setSubmitMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const cardRadiusClass = 'rounded-2xl';
 
   React.useEffect(() => {
@@ -25,11 +30,23 @@ const HomePage: React.FC = () => {
     const loadPageData = async () => {
       setIsLoading(true);
       setErrorMessage(null);
+      setSubmitMessage(null);
 
       try {
+        let idToken: string | undefined;
+        if (user) {
+          try {
+            idToken = await user.getIdToken();
+          } catch {
+            // token fetch failed — proceed without auth for creators list
+          }
+        }
+
         const [creatorData, todayVotes] = await Promise.all([
           fetchCreators({ signal: controller.signal }),
-          fetchUserVotesToday({ signal: controller.signal }),
+          user && idToken
+            ? fetchUserVotesToday({ signal: controller.signal, idToken })
+            : Promise.resolve({ creatorIds: [] as string[] }),
         ]);
         const sorted = [...creatorData].sort((a, b) => b.totalVoteCount - a.totalVoteCount);
 
@@ -51,7 +68,7 @@ const HomePage: React.FC = () => {
     loadPageData();
 
     return () => controller.abort();
-  }, [refreshToken]);
+  }, [refreshToken, user]);
 
   const retryFetch = () => {
     setSelectedIds([]);
@@ -81,15 +98,120 @@ const HomePage: React.FC = () => {
   const remaining = Math.max(0, maxVotes - selectedIds.length);
   const reachedLimit = selectedIds.length >= maxVotes;
 
-  const handleConfirm = () => {
-    alert(`選択したID: ${selectedIds.join(', ')}`);
+  const newSelections = selectedIds.filter(id => !lockedIds.includes(id));
+
+  const handleConfirm = async () => {
+    if (newSelections.length === 0) return;
+
+    if (!user) {
+      try {
+        await signInWithGoogle();
+      } catch {
+        setSubmitMessage({ type: 'error', text: 'ログインがキャンセルされました。' });
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+    setSubmitMessage(null);
+
+    try {
+      const idToken = await getIdToken();
+      const result = await submitVotes(idToken, newSelections);
+
+      // Update locked IDs with the newly accepted ones
+      setLockedIds(prev => [...prev, ...result.acceptedCreatorIds]);
+      setSubmitMessage({
+        type: 'success',
+        text: `${result.acceptedCreatorIds.length} 人への投票が完了しました！`,
+      });
+
+      // Refresh login info to get updated usedVotes
+      await refreshLoginInfo();
+    } catch (error) {
+      if (error instanceof VoteApiError) {
+        switch (error.status) {
+          case 401:
+            // AUTH_INVALID_TOKEN → try re-login
+            setSubmitMessage({
+              type: 'error',
+              text: '認証エラーが発生しました。再ログインしてください。',
+            });
+            try {
+              await signInWithGoogle();
+              setSubmitMessage(null);
+              // Retry automatically after re-login
+              const newToken = await getIdToken();
+              const retryResult = await submitVotes(newToken, newSelections);
+              setLockedIds(prev => [...prev, ...retryResult.acceptedCreatorIds]);
+              setSubmitMessage({
+                type: 'success',
+                text: `${retryResult.acceptedCreatorIds.length} 人への投票が完了しました！`,
+              });
+              await refreshLoginInfo();
+            } catch {
+              setSubmitMessage({ type: 'error', text: '再認証に失敗しました。ページをリロードしてください。' });
+            }
+            break;
+          case 403:
+            // USER_BLOCKED
+            setSubmitMessage({ type: 'error', text: 'アカウントがブロックされているため投票できません。' });
+            break;
+          case 400:
+            // VOTE_RULE_VIOLATION
+            setSubmitMessage({
+              type: 'error',
+              text: error.message || '投票ルール違反: 残票不足または当日重複の可能性があります。',
+            });
+            break;
+          default:
+            // 500 etc.
+            setSubmitMessage({
+              type: 'error',
+              text: 'サーバーエラーが発生しました。しばらくしてから再試行してください。',
+            });
+        }
+      } else {
+        setSubmitMessage({
+          type: 'error',
+          text: error instanceof Error ? error.message : '投票中にエラーが発生しました。',
+        });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderContent = () => {
-    if (isLoading) {
+    if (authLoading || isLoading) {
       return (
         <div className="flex flex-1 items-center justify-center">
-          <p className="text-sm text-gray-600">クリエイターを取得しています…</p>
+          <p className="text-sm text-gray-600">
+            {authLoading ? '認証を確認しています…' : 'クリエイターを取得しています…'}
+          </p>
+        </div>
+      );
+    }
+
+    if (loginError) {
+      return (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+          <p className="text-sm text-red-600">{loginError}</p>
+          <button
+            type="button"
+            onClick={clearLoginError}
+            className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700"
+          >
+            閉じる
+          </button>
+        </div>
+      );
+    }
+
+    if (isBlocked) {
+      return (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+          <p className="text-sm text-red-600">アカウントがブロックされています。操作を行うことができません。</p>
         </div>
       );
     }
@@ -123,6 +245,18 @@ const HomePage: React.FC = () => {
 
     return (
       <div className="flex flex-col gap-6">
+        {submitMessage && (
+          <div
+            className={`rounded-2xl border p-4 shadow-sm ${
+              submitMessage.type === 'success'
+                ? 'border-green-200 bg-green-50 text-green-700'
+                : 'border-red-200 bg-red-50 text-red-700'
+            }`}
+          >
+            <p className="text-sm font-medium">{submitMessage.text}</p>
+          </div>
+        )}
+
         {lockedIds.length > 0 && (
           <section className="rounded-2xl border border-pink-100 bg-white/80 p-4 shadow-sm">
             <p className="text-sm font-semibold text-pink-500">
@@ -222,23 +356,50 @@ const HomePage: React.FC = () => {
                 className="h-8 w-auto"
               />
             </div>
-            <div className="text-sm font-medium text-gray-700">
-              残り <span className="text-pink-500 font-semibold">{remaining}</span> / {maxVotes} 票
+            <div className="flex items-center gap-4">
+              <div className="text-sm font-medium text-gray-700">
+                残り <span className="text-pink-500 font-semibold">{remaining}</span> / {maxVotes} 票
+              </div>
+              {user ? (
+                <div className="flex items-center gap-2">
+                  {user.photoURL && (
+                    <img src={user.photoURL} alt="" className="h-7 w-7 rounded-full" />
+                  )}
+                  <span className="hidden text-xs text-gray-500 sm:inline">{user.displayName}</span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={signInWithGoogle}
+                  className="rounded-full bg-[#FF69B4] px-4 py-1.5 text-xs font-semibold text-white shadow transition hover:brightness-105"
+                >
+                  Googleでログイン
+                </button>
+              )}
             </div>
           </div>
         </header>
 
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-24 pb-28">{renderContent()}</main>
 
-        {selectedIds.length > 0 && (
+        {newSelections.length > 0 && (
           <div className="fixed bottom-0 inset-x-0 z-30 border-t border-gray-200 bg-white/70 backdrop-blur">
             <div className="mx-auto flex w-full max-w-6xl justify-center px-4 py-4">
               <button
                 type="button"
                 onClick={handleConfirm}
-                className="w-full max-w-md rounded-full bg-[#FF69B4] px-6 py-3 text-center text-base font-semibold text-white shadow-lg transition hover:brightness-105"
+                disabled={isSubmitting}
+                className={`w-full max-w-md rounded-full px-6 py-3 text-center text-base font-semibold text-white shadow-lg transition ${
+                  isSubmitting
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-[#FF69B4] hover:brightness-105'
+                }`}
               >
-                {selectedIds.length} 人に投票を確定する
+                {isSubmitting
+                  ? '送信中…'
+                  : user
+                    ? `${newSelections.length} 人に投票を確定する`
+                    : `ログインして ${newSelections.length} 人に投票する`}
               </button>
             </div>
           </div>

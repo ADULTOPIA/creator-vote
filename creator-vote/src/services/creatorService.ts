@@ -1,7 +1,6 @@
-import { mockFetchCreators } from '../mocks/creators';
 import { Creator } from '../types/creator';
 
-import { API_BASE_URL, shouldUseMockApi } from './apiConfig';
+import { API_BASE_URL } from './apiConfig';
 
 const API_PATH = '/creators';
 const API_ENDPOINT = `${API_BASE_URL}${API_PATH}`;
@@ -11,9 +10,6 @@ type FetchCreatorsOptions = {
 };
 
 export const fetchCreators = async ({ signal }: FetchCreatorsOptions = {}): Promise<Creator[]> => {
-  if (shouldUseMockApi) {
-    return mockFetchCreators({ signal });
-  }
 
   const response = await fetch(API_ENDPOINT, { signal });
 
