@@ -7,6 +7,7 @@ import { submitVotes, VoteApiError } from '../services/voteService';
 import { Creator } from '../types/creator';
 import Modal from '../components/Modal';
 import SmallCreatorCard from '../components/SmallCreatorCard';
+import Footer from '../components/Footer';
 
 const HomePage: React.FC = () => {
   const { user, loading: authLoading, loginInfo, signInWithGoogle, getIdToken, refreshLoginInfo, loginError, clearLoginError } = useAuth();
@@ -406,7 +407,7 @@ const HomePage: React.FC = () => {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-24 pb-28">{renderContent()}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-24 pb-12">{renderContent()}</main>
 
         {newSelections.length > 0 && (
           <div className="fixed bottom-0 inset-x-0 z-30 border-t border-gray-200 bg-white/70 backdrop-blur">
@@ -430,6 +431,8 @@ const HomePage: React.FC = () => {
             </div>
           </div>
         )}
+
+        <Footer />
 
         <Modal
           isOpen={showConfirmPopup}

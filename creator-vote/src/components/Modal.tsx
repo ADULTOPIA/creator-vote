@@ -1,6 +1,35 @@
 import React from 'react';
+import styled from 'styled-components';
 import { Creator } from '../types/creator';
 import SmallCreatorCard from './SmallCreatorCard';
+
+const ScrollableContainer = styled.div`
+  overflow-x: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  padding-right: 8px;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 105, 180, 0.25);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 105, 180, 0.45);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+`;
 
 interface ModalButton {
   label: string;
@@ -20,6 +49,7 @@ interface ModalProps {
   isSubmitting?: boolean;
   onConfirm?: () => void;
   onCancel?: () => void;
+  scrollable?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -31,6 +61,7 @@ const Modal: React.FC<ModalProps> = ({
   isSubmitting,
   onConfirm,
   onCancel,
+  scrollable = false,
 }) => {
   if (!isOpen) return null;
 
@@ -93,7 +124,13 @@ const Modal: React.FC<ModalProps> = ({
             ×
           </button>
         </div>
-        {displayContent && <div className="mb-4">{displayContent}</div>}
+        {displayContent && scrollable ? (
+          <ScrollableContainer className="mb-4 max-h-[60vh] overflow-y-auto">
+            {displayContent}
+          </ScrollableContainer>
+        ) : (
+          displayContent && <div className="mb-4">{displayContent}</div>
+        )}
         <div className="flex gap-3 justify-center mt-2">
           {displayButtons
             .filter((button) => button.variant === 'primary')
