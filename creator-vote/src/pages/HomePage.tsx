@@ -6,6 +6,7 @@ import { fetchUserVotesToday } from '../services/userVoteService';
 import { submitVotes, VoteApiError } from '../services/voteService';
 import { Creator } from '../types/creator';
 import Modal from '../components/Modal';
+import SmallCreatorCard from '../components/SmallCreatorCard';
 
 const HomePage: React.FC = () => {
   const { user, loading: authLoading, loginInfo, signInWithGoogle, getIdToken, refreshLoginInfo, loginError, clearLoginError } = useAuth();
@@ -25,6 +26,8 @@ const HomePage: React.FC = () => {
   const [submitMessage, setSubmitMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showConfirmPopup, setShowConfirmPopup] = React.useState(false);
   const [showLoginModal, setShowLoginModal] = React.useState(false);
+  const [showNoVotesModal, setShowNoVotesModal] = React.useState(false);
+  const [showAlreadyVotedModal, setShowAlreadyVotedModal] = React.useState(false);
   const cardRadiusClass = 'rounded-2xl';
 
   React.useEffect(() => {
@@ -51,9 +54,14 @@ const HomePage: React.FC = () => {
             ? fetchUserVotesToday({ signal: controller.signal, idToken })
             : Promise.resolve({ creatorIds: [] as string[] }),
         ]);
-        const sorted = [...creatorData].sort((a, b) => b.totalVoteCount - a.totalVoteCount);
+        // Fisher-Yates shuffle for true random order
+        const shuffled = [...creatorData];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
 
-        setCreators(sorted);
+        setCreators(shuffled);
         setLockedIds(todayVotes.creatorIds);
         setSelectedIds(todayVotes.creatorIds);
       } catch (error) {
@@ -82,8 +90,13 @@ const HomePage: React.FC = () => {
     setRefreshToken(previous => previous + 1);
   };
 
-  const toggleSelect = (id: string) => {
+  const toggleSelect = (id: string, isDisabled: boolean) => {
     if (lockedIds.includes(id)) {
+      return;
+    }
+
+    if (isDisabled) {
+      setShowNoVotesModal(true);
       return;
     }
 
@@ -136,11 +149,13 @@ const HomePage: React.FC = () => {
       const result = await submitVotes(idToken, newSelections);
 
       setLockedIds(prev => [...prev, ...result.acceptedCreatorIds]);
-      setSubmitMessage({
-        type: 'success',
-        text: `${result.acceptedCreatorIds.length} 人への投票が完了しました！`,
-      });
+      setCreators(prev => prev.map(creator =>
+        result.acceptedCreatorIds.includes(creator.creatorId)
+          ? { ...creator, totalVoteCount: creator.totalVoteCount + 1 }
+          : creator
+      ));
       await refreshLoginInfo();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       if (error instanceof VoteApiError) {
         switch (error.status) {
@@ -155,11 +170,13 @@ const HomePage: React.FC = () => {
               const newToken = await getIdToken();
               const retryResult = await submitVotes(newToken, newSelections);
               setLockedIds(prev => [...prev, ...retryResult.acceptedCreatorIds]);
-              setSubmitMessage({
-                type: 'success',
-                text: `${retryResult.acceptedCreatorIds.length} 人への投票が完了しました！`,
-              });
+              setCreators(prev => prev.map(creator =>
+                retryResult.acceptedCreatorIds.includes(creator.creatorId)
+                  ? { ...creator, totalVoteCount: creator.totalVoteCount + 1 }
+                  : creator
+              ));
               await refreshLoginInfo();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch {
               setSubmitMessage({ type: 'error', text: '再認証に失敗しました。ページをリロードしてください。' });
             }
@@ -274,14 +291,9 @@ const HomePage: React.FC = () => {
             <p className="mt-1 text-xs text-gray-600">
               既存の投票はキャンセルできません。翌日以降に再度投票できます。
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {(votedCreators.length ? votedCreators : lockedIds).map(item => (
-                <span
-                  key={typeof item === 'string' ? item : item.creatorId}
-                  className="rounded-full bg-pink-50 px-3 py-1 text-xs font-medium text-pink-600"
-                >
-                  {typeof item === 'string' ? item : item.displayName}
-                </span>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {votedCreators.map(creator => (
+                <SmallCreatorCard key={creator.creatorId} creator={creator} />
               ))}
             </div>
           </section>
@@ -297,8 +309,6 @@ const HomePage: React.FC = () => {
               cardClass = 'bg-white border border-gray-200 cursor-not-allowed';
             } else if (isSelected) {
               cardClass = 'bg-pink-50 border-[3px] border-[#FF69B4] ring-2 ring-[#FF69B4] cursor-pointer';
-            } else if (isDisabled) {
-              cardClass = 'bg-gray-100 border border-gray-200 text-gray-400 pointer-events-none';
             } else {
               cardClass = 'bg-white border border-gray-200 cursor-pointer';
             }
@@ -308,9 +318,10 @@ const HomePage: React.FC = () => {
                 type="button"
                 onClick={() => {
                   if (isLocked) {
+                    setShowAlreadyVotedModal(true);
                     return;
                   }
-                  toggleSelect(creator.creatorId);
+                  toggleSelect(creator.creatorId, isDisabled);
                 }}
                 className={`text-left ${cardRadiusClass} shadow-sm transition hover:shadow-md ${cardClass}`}
               >
@@ -320,14 +331,11 @@ const HomePage: React.FC = () => {
                     alt={creator.displayName}
                     className="h-full w-full object-cover"
                   />
-                  {isDisabled && (
-                    <div className="absolute inset-0 bg-gray-400 bg-opacity-50 pointer-events-none z-10" />
-                  )}
                 </div>
                 <div className="px-3 py-3">
-                  <h3 className={`text-sm font-semibold md:text-base${isDisabled ? ' text-gray-400' : ' text-gray-800'}`}>{creator.displayName}</h3>
+                  <h3 className="text-sm font-semibold md:text-base text-gray-800">{creator.displayName}</h3>
                   <div className="flex items-center justify-between gap-1">
-                    <p className={`text-xs md:text-sm${isDisabled ? ' text-gray-400' : ' text-gray-500'}`}>
+                    <p className="text-xs md:text-sm text-gray-500">
                       累計投票数: {creator.totalVoteCount.toLocaleString()}
                     </p>
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap ${
@@ -457,6 +465,36 @@ const HomePage: React.FC = () => {
           ]}
         >
           <p className="text-sm text-gray-600">投票するにはGoogleアカウントでログインしてください。</p>
+        </Modal>
+
+        <Modal
+          isOpen={showNoVotesModal}
+          title="残票がありません"
+          onCancel={() => setShowNoVotesModal(false)}
+          buttons={[
+            {
+              label: '了解',
+              onClick: () => setShowNoVotesModal(false),
+              variant: 'primary' as const,
+            },
+          ]}
+        >
+          <p className="text-sm text-gray-600">今日の投票数の上限に達しています。翌日以降に投票できます。</p>
+        </Modal>
+
+        <Modal
+          isOpen={showAlreadyVotedModal}
+          title="本日投票済みです"
+          onCancel={() => setShowAlreadyVotedModal(false)}
+          buttons={[
+            {
+              label: '了解',
+              onClick: () => setShowAlreadyVotedModal(false),
+              variant: 'primary' as const,
+            },
+          ]}
+        >
+          <p className="text-sm text-gray-600">このクリエイターには本日投票済みです。翌日以降に再度投票できます。</p>
         </Modal>
       </div>
     </div>
