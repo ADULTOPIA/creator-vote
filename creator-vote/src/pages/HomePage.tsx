@@ -24,6 +24,7 @@ const HomePage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitMessage, setSubmitMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showConfirmPopup, setShowConfirmPopup] = React.useState(false);
+  const [showLoginModal, setShowLoginModal] = React.useState(false);
   const cardRadiusClass = 'rounded-2xl';
 
   React.useEffect(() => {
@@ -83,6 +84,11 @@ const HomePage: React.FC = () => {
 
   const toggleSelect = (id: string) => {
     if (lockedIds.includes(id)) {
+      return;
+    }
+
+    if (!user) {
+      setShowLoginModal(true);
       return;
     }
 
@@ -367,9 +373,11 @@ const HomePage: React.FC = () => {
               />
             </div>
             <div className="flex items-center gap-4">
-              <div className="text-sm font-medium text-gray-700">
-                残り <span className="text-pink-500 font-semibold">{remaining}</span> / {maxVotes} 票
-              </div>
+              {user && (
+                <div className="text-sm font-medium text-gray-700">
+                  残り <span className="text-pink-500 font-semibold">{remaining}</span> / {maxVotes} 票
+                </div>
+              )}
               {user ? (
                 <div className="flex items-center gap-2">
                   {user.photoURL && (
@@ -423,6 +431,33 @@ const HomePage: React.FC = () => {
           onConfirm={handleConfirmVote}
           onCancel={() => setShowConfirmPopup(false)}
         />
+
+        <Modal
+          isOpen={showLoginModal}
+          title="ログインが必要です"
+          onCancel={() => setShowLoginModal(false)}
+          buttons={[
+            {
+              label: 'Googleでログイン',
+              onClick: async () => {
+                try {
+                  await signInWithGoogle();
+                  setShowLoginModal(false);
+                } catch (error) {
+                  console.error('Login failed:', error);
+                }
+              },
+              variant: 'primary' as const,
+            },
+            {
+              label: 'キャンセル',
+              onClick: () => setShowLoginModal(false),
+              variant: 'secondary' as const,
+            },
+          ]}
+        >
+          <p className="text-sm text-gray-600">投票するにはGoogleアカウントでログインしてください。</p>
+        </Modal>
       </div>
     </div>
   );
