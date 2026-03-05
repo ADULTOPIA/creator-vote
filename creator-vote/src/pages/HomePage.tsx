@@ -5,6 +5,7 @@ import { fetchCreators } from '../services/creatorService';
 import { fetchUserVotesToday } from '../services/userVoteService';
 import { submitVotes, VoteApiError } from '../services/voteService';
 import { Creator } from '../types/creator';
+import Modal from '../components/Modal';
 
 const HomePage: React.FC = () => {
   const { user, loading: authLoading, loginInfo, signInWithGoogle, getIdToken, refreshLoginInfo, loginError, clearLoginError } = useAuth();
@@ -22,6 +23,7 @@ const HomePage: React.FC = () => {
   const [refreshToken, setRefreshToken] = React.useState(0);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitMessage, setSubmitMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showConfirmPopup, setShowConfirmPopup] = React.useState(false);
   const cardRadiusClass = 'rounded-2xl';
 
   React.useEffect(() => {
@@ -100,7 +102,14 @@ const HomePage: React.FC = () => {
 
   const newSelections = selectedIds.filter(id => !lockedIds.includes(id));
 
-  const handleConfirm = async () => {
+  // Show confirmation popup instead of submitting immediately
+  const handleVoteClick = () => {
+    if (newSelections.length === 0) return;
+    setShowConfirmPopup(true);
+  };
+
+  // Actually submit votes after confirmation
+  const handleConfirmVote = async () => {
     if (newSelections.length === 0) return;
 
     if (!user) {
@@ -108,6 +117,7 @@ const HomePage: React.FC = () => {
         await signInWithGoogle();
       } catch {
         setSubmitMessage({ type: 'error', text: 'ログインがキャンセルされました。' });
+        setShowConfirmPopup(false);
         return;
       }
     }
@@ -119,20 +129,16 @@ const HomePage: React.FC = () => {
       const idToken = await getIdToken();
       const result = await submitVotes(idToken, newSelections);
 
-      // Update locked IDs with the newly accepted ones
       setLockedIds(prev => [...prev, ...result.acceptedCreatorIds]);
       setSubmitMessage({
         type: 'success',
         text: `${result.acceptedCreatorIds.length} 人への投票が完了しました！`,
       });
-
-      // Refresh login info to get updated usedVotes
       await refreshLoginInfo();
     } catch (error) {
       if (error instanceof VoteApiError) {
         switch (error.status) {
           case 401:
-            // AUTH_INVALID_TOKEN → try re-login
             setSubmitMessage({
               type: 'error',
               text: '認証エラーが発生しました。再ログインしてください。',
@@ -140,7 +146,6 @@ const HomePage: React.FC = () => {
             try {
               await signInWithGoogle();
               setSubmitMessage(null);
-              // Retry automatically after re-login
               const newToken = await getIdToken();
               const retryResult = await submitVotes(newToken, newSelections);
               setLockedIds(prev => [...prev, ...retryResult.acceptedCreatorIds]);
@@ -154,18 +159,15 @@ const HomePage: React.FC = () => {
             }
             break;
           case 403:
-            // USER_BLOCKED
             setSubmitMessage({ type: 'error', text: 'アカウントがブロックされているため投票できません。' });
             break;
           case 400:
-            // VOTE_RULE_VIOLATION
             setSubmitMessage({
               type: 'error',
               text: error.message || '投票ルール違反: 残票不足または当日重複の可能性があります。',
             });
             break;
           default:
-            // 500 etc.
             setSubmitMessage({
               type: 'error',
               text: 'サーバーエラーが発生しました。しばらくしてから再試行してください。',
@@ -179,6 +181,7 @@ const HomePage: React.FC = () => {
       }
     } finally {
       setIsSubmitting(false);
+      setShowConfirmPopup(false);
     }
   };
 
@@ -283,12 +286,16 @@ const HomePage: React.FC = () => {
             const isSelected = selectedIds.includes(creator.creatorId);
             const isLocked = lockedIds.includes(creator.creatorId);
             const isDisabled = reachedLimit && !isSelected;
-            const stateClass = isLocked
-              ? 'cursor-not-allowed opacity-80'
-              : isDisabled
-                ? 'opacity-50 pointer-events-none'
-                : 'cursor-pointer';
-
+            let cardClass = '';
+            if (isLocked) {
+              cardClass = 'bg-white border border-gray-200 cursor-not-allowed';
+            } else if (isSelected) {
+              cardClass = 'bg-pink-50 border-[3px] border-[#FF69B4] ring-2 ring-[#FF69B4] cursor-pointer';
+            } else if (isDisabled) {
+              cardClass = 'bg-gray-100 border border-gray-200 text-gray-400 pointer-events-none';
+            } else {
+              cardClass = 'bg-white border border-gray-200 cursor-pointer';
+            }
             return (
               <button
                 key={creator.creatorId}
@@ -299,29 +306,32 @@ const HomePage: React.FC = () => {
                   }
                   toggleSelect(creator.creatorId);
                 }}
-                className={`text-left ${cardRadiusClass} bg-white shadow-sm transition hover:shadow-md ${
-                  isSelected
-                    ? 'border-[3px] border-[#FF69B4] ring-2 ring-[#FF69B4]/60'
-                    : 'border border-gray-200'
-                } ${stateClass}`}
+                className={`text-left ${cardRadiusClass} shadow-sm transition hover:shadow-md ${cardClass}`}
               >
-                <div className="overflow-hidden rounded-t-2xl aspect-[3/4]">
+                <div className="overflow-hidden rounded-t-2xl aspect-[3/4] relative">
                   <img
                     src={creator.imageUrl}
                     alt={creator.displayName}
                     className="h-full w-full object-cover"
                   />
+                  {isDisabled && (
+                    <div className="absolute inset-0 bg-gray-400 bg-opacity-50 pointer-events-none z-10" />
+                  )}
                 </div>
                 <div className="px-3 py-3">
-                  <h3 className="text-sm font-semibold text-gray-800 md:text-base">{creator.displayName}</h3>
-                  <p className="text-xs text-gray-500 md:text-sm">
-                    累計投票数: {creator.totalVoteCount.toLocaleString()}
-                  </p>
-                  {isLocked && (
-                    <span className="mt-2 inline-flex items-center rounded-full bg-pink-50 px-2 py-0.5 text-[11px] font-semibold text-pink-500">
+                  <h3 className={`text-sm font-semibold md:text-base${isDisabled ? ' text-gray-400' : ' text-gray-800'}`}>{creator.displayName}</h3>
+                  <div className="flex items-center justify-between gap-1">
+                    <p className={`text-xs md:text-sm${isDisabled ? ' text-gray-400' : ' text-gray-500'}`}>
+                      累計投票数: {creator.totalVoteCount.toLocaleString()}
+                    </p>
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap ${
+                      isLocked
+                        ? 'bg-pink-50 text-pink-500'
+                        : 'invisible'
+                    }`}>
                       本日投票済
                     </span>
-                  )}
+                  </div>
                 </div>
               </button>
             );
@@ -387,7 +397,7 @@ const HomePage: React.FC = () => {
             <div className="mx-auto flex w-full max-w-6xl justify-center px-4 py-4">
               <button
                 type="button"
-                onClick={handleConfirm}
+                onClick={handleVoteClick}
                 disabled={isSubmitting}
                 className={`w-full max-w-md rounded-full px-6 py-3 text-center text-base font-semibold text-white shadow-lg transition ${
                   isSubmitting
@@ -404,6 +414,15 @@ const HomePage: React.FC = () => {
             </div>
           </div>
         )}
+
+        <Modal
+          isOpen={showConfirmPopup}
+          title="この内容で投票しますか？"
+          isSubmitting={isSubmitting}
+          selectedCreators={creators.filter(c => newSelections.includes(c.creatorId))}
+          onConfirm={handleConfirmVote}
+          onCancel={() => setShowConfirmPopup(false)}
+        />
       </div>
     </div>
   );
