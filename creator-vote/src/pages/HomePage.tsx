@@ -278,7 +278,7 @@ const HomePage: React.FC = () => {
           </section>
         )}
 
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {creators.map(creator => {
             const isSelected = selectedIds.includes(creator.creatorId);
             const isLocked = lockedIds.includes(creator.creatorId);
@@ -305,11 +305,11 @@ const HomePage: React.FC = () => {
                     : 'border border-gray-200'
                 } ${stateClass}`}
               >
-                <div className="overflow-hidden rounded-t-2xl">
+                <div className="overflow-hidden rounded-t-2xl aspect-[3/4]">
                   <img
                     src={creator.imageUrl}
                     alt={creator.displayName}
-                    className="h-40 w-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 </div>
                 <div className="px-3 py-3">
