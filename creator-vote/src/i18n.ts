@@ -13,6 +13,16 @@ const resources = {
   ko: { translation: ko },
 };
 
+// 言語表示名のマッピング
+export const languageNames: Record<string, string> = {
+  'zh-TW': '繁體中文',
+  ja: '日本語',
+  ko: '한국어',
+};
+
+// 利用可能な言語リストを取得
+export const availableLanguages = Object.keys(resources);
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
