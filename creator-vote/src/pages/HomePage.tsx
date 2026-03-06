@@ -8,6 +8,7 @@ import { Creator } from '../types/creator';
 import Modal from '../components/Modal';
 import SmallCreatorCard from '../components/SmallCreatorCard';
 import Footer from '../components/Footer';
+import FloatingHeart from '../components/FloatingHeart';
 
 const HomePage: React.FC = () => {
   const { user, loading: authLoading, loginInfo, signInWithGoogle, getIdToken, refreshLoginInfo, loginError, clearLoginError } = useAuth();
@@ -28,6 +29,7 @@ const HomePage: React.FC = () => {
   const [showLoginModal, setShowLoginModal] = React.useState(false);
   const [showNoVotesModal, setShowNoVotesModal] = React.useState(false);
   const [showAlreadyVotedModal, setShowAlreadyVotedModal] = React.useState(false);
+  const [floatingHearts, setFloatingHearts] = React.useState<Array<{ id: string; x: number; y: number; size: 'large' | 'small'; duration: number }>>([]);
   const cardRadiusClass = 'rounded-2xl';
 
   React.useEffect(() => {
@@ -88,6 +90,49 @@ const HomePage: React.FC = () => {
     setErrorMessage(null);
     setIsLoading(true);
     setRefreshToken(previous => previous + 1);
+  };
+
+  const createFloatingHearts = (x: number, y: number) => {
+    // 複数のハート粒子を生成（クリック位置周辺に分散させる）
+    const count = 3 + Math.floor(Math.random() * 3); // 3～5個のハート
+    // 小さいハートの配置方向（四方八方に拡散）
+    const directions = [
+      { x: 20, y: -20 },   // 右上
+      { x: -20, y: -20 },  // 左上
+      { x: 10, y: 10 },    // 右下
+      { x: -10, y: 10 },   // 左下
+      { x: 20, y: 0 },    // 右
+    ];
+    
+    const newHearts = Array.from({ length: count }).map((_, i) => {
+      const duration = 1 + Math.random() * 0.8; // 1.0～1.8秒でバラバラに
+      
+      if (i === 0) {
+        return {
+          id: `heart-${Date.now()}-${i}`,
+          x: x + (Math.random() - 0.5) * 40, // ±20pxの範囲内でランダム
+          y: y + (Math.random() - 0.5) * 40,
+          size: 'large' as const,
+          duration,
+        };
+      }
+      
+      const direction = directions[(i - 1) % directions.length];
+      const variation = 1 + (Math.random() - 0.5) * 0.4; // 0.8～1.2の変動
+      
+      return {
+        id: `heart-${Date.now()}-${i}`,
+        x: x + direction.x * variation + (Math.random() - 0.5) * 20,
+        y: y + direction.y * variation + (Math.random() - 0.5) * 20,
+        size: 'small' as const,
+        duration,
+      };
+    });
+    setFloatingHearts(prev => [...prev, ...newHearts]);
+  };
+
+  const removeFloatingHeart = (id: string) => {
+    setFloatingHearts(prev => prev.filter(heart => heart.id !== id));
   };
 
   const toggleSelect = (id: string, isDisabled: boolean) => {
@@ -357,6 +402,9 @@ const HomePage: React.FC = () => {
 
   return (
     <div
+      onMouseDown={(e) => {
+        createFloatingHearts(e.clientX, e.clientY);
+      }}
       className="relative min-h-screen"
       style={{
         backgroundImage: `url(${process.env.PUBLIC_URL}/adultopia/hero.jpg)`,
@@ -369,6 +417,18 @@ const HomePage: React.FC = () => {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-white/50 shadow-lg backdrop-blur"
       />
+
+      {floatingHearts.map(heart => (
+        <FloatingHeart
+          key={heart.id}
+          id={heart.id}
+          x={heart.x}
+          y={heart.y}
+          size={heart.size}
+          duration={heart.duration}
+          onComplete={removeFloatingHeart}
+        />
+      ))}
 
       <div className="relative z-10 flex min-h-screen flex-col">
         <header className="fixed inset-x-0 top-0 z-20 border-b border-gray-200 bg-white/70 backdrop-blur">
