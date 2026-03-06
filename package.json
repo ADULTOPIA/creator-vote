@@ -5,8 +5,6 @@
     "react-i18next": "^16.5.3"
   },
   "devDependencies": {
-    "imagemin": "^9.0.1",
-    "imagemin-mozjpeg": "^10.0.0",
-    "imagemin-pngquant": "^10.0.0"
+    
   }
 }

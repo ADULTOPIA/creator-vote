@@ -13,7 +13,6 @@ const HomePage: React.FC = () => {
   const { user, loading: authLoading, loginInfo, signInWithGoogle, getIdToken, refreshLoginInfo, loginError, clearLoginError } = useAuth();
 
   const dayVotes = loginInfo?.dayVotes ?? 5;
-  const usedVotes = loginInfo?.usedVotes ?? 0;
   const isBlocked = loginInfo?.isBlocked ?? false;
   const maxVotes = dayVotes;
 
