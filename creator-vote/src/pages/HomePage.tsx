@@ -14,7 +14,7 @@ import { availableLanguages, languageNames } from '../i18n';
 
 const HomePage: React.FC = () => {
   const { user, loading: authLoading, loginInfo, signInWithGoogle, getIdToken, refreshLoginInfo, loginError, clearLoginError } = useAuth();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const dayVotes = loginInfo?.dayVotes ?? 5;
   const isBlocked = loginInfo?.isBlocked ?? false;
@@ -90,7 +90,7 @@ const HomePage: React.FC = () => {
           return;
         }
 
-        const fallbackMessage = error instanceof Error ? error.message : '不明なエラーが発生しました。';
+        const fallbackMessage = error instanceof Error ? error.message : t('unknownError');
         setErrorMessage(fallbackMessage);
       } finally {
         setIsLoading(false);
@@ -199,7 +199,7 @@ const HomePage: React.FC = () => {
       try {
         await signInWithGoogle();
       } catch {
-        setSubmitMessage({ type: 'error', text: 'ログインがキャンセルされました。' });
+        setSubmitMessage({ type: 'error', text: t('loginCancelled') });
         setShowConfirmPopup(false);
         return;
       }
@@ -226,7 +226,7 @@ const HomePage: React.FC = () => {
           case 401:
             setSubmitMessage({
               type: 'error',
-              text: '認証エラーが発生しました。再ログインしてください。',
+              text: t('authError'),
             });
             try {
               await signInWithGoogle();
@@ -242,28 +242,28 @@ const HomePage: React.FC = () => {
               await refreshLoginInfo();
               window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch {
-              setSubmitMessage({ type: 'error', text: '再認証に失敗しました。ページをリロードしてください。' });
+              setSubmitMessage({ type: 'error', text: t('reauthFailed') });
             }
             break;
           case 403:
-            setSubmitMessage({ type: 'error', text: 'アカウントがブロックされているため投票できません。' });
+            setSubmitMessage({ type: 'error', text: t('accountBlocked') });
             break;
           case 400:
             setSubmitMessage({
               type: 'error',
-              text: error.message || '投票ルール違反: 残票不足または当日重複の可能性があります。',
+              text: error.message || t('votingRuleViolation'),
             });
             break;
           default:
             setSubmitMessage({
               type: 'error',
-              text: 'サーバーエラーが発生しました。しばらくしてから再試行してください。',
+              text: t('serverError'),
             });
         }
       } else {
         setSubmitMessage({
           type: 'error',
-          text: error instanceof Error ? error.message : '投票中にエラーが発生しました。',
+          text: error instanceof Error ? error.message : t('votingError'),
         });
       }
     } finally {
@@ -277,7 +277,7 @@ const HomePage: React.FC = () => {
       return (
         <div className="flex flex-1 items-center justify-center">
           <p className="text-sm text-gray-600">
-            {authLoading ? '認証を確認しています…' : 'クリエイターを取得しています…'}
+            {authLoading ? t('authChecking') : t('loadingCreators')}
           </p>
         </div>
       );
@@ -292,7 +292,7 @@ const HomePage: React.FC = () => {
             onClick={clearLoginError}
             className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700"
           >
-            閉じる
+            {t('closeButton')}
           </button>
         </div>
       );
@@ -301,7 +301,7 @@ const HomePage: React.FC = () => {
     if (isBlocked) {
       return (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-          <p className="text-sm text-red-600">アカウントがブロックされています。操作を行うことができません。</p>
+          <p className="text-sm text-red-600">{t('accountBlockedFull')}</p>
         </div>
       );
     }
@@ -315,7 +315,7 @@ const HomePage: React.FC = () => {
             onClick={retryFetch}
             className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700"
           >
-            再試行
+            {t('retryButton')}
           </button>
         </div>
       );
@@ -324,7 +324,7 @@ const HomePage: React.FC = () => {
     if (!creators.length) {
       return (
         <div className="flex flex-1 flex-col items-center justify-center text-center text-sm text-gray-600">
-          公開中のクリエイターが見つかりません。
+          {t('noCreatorsFound')}
         </div>
       );
     }
@@ -350,10 +350,10 @@ const HomePage: React.FC = () => {
         {lockedIds.length > 0 && (
           <section className="rounded-2xl border border-pink-100 bg-white/80 p-4 shadow-sm">
             <p className="text-sm font-semibold text-pink-500">
-              本日すでに {lockedIds.length} 票 投票済みです
+              {t('votedToday')} {lockedIds.length} {t('votedTickets')}
             </p>
             <p className="mt-1 text-xs text-gray-600">
-              既存の投票はキャンセルできません。翌日以降に再度投票できます。
+              {t('cannotCancelVotes')}
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               {votedCreators.map(creator => (
@@ -400,14 +400,14 @@ const HomePage: React.FC = () => {
                   <h3 className="text-sm font-semibold md:text-base text-gray-800">{creator.displayName}</h3>
                   <div className="flex items-center justify-between gap-1">
                     <p className="text-xs md:text-sm text-gray-500">
-                      累計投票数: {creator.totalVoteCount.toLocaleString()}
+                      {t('totalVotes')} {creator.totalVoteCount.toLocaleString()}
                     </p>
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap ${
                       isLocked
                         ? 'bg-pink-50 text-pink-500'
                         : 'invisible'
                     }`}>
-                      本日投票済
+                      {t('votedBadge')}
                     </span>
                   </div>
                 </div>
@@ -462,7 +462,7 @@ const HomePage: React.FC = () => {
             <div className="flex items-center gap-4">
               {user && (
                 <div className="text-sm font-medium text-gray-700">
-                  残り <span className="text-pink-500 font-semibold">{remaining}</span> / {maxVotes} 票
+                  {t('remaining')} <span className="text-pink-500 font-semibold">{remaining}</span> / {maxVotes} {t('votes')}
                 </div>
               )}
               <div className="relative" ref={menuRef}>
@@ -501,14 +501,14 @@ const HomePage: React.FC = () => {
                     <div className="py-2">
                       {/* 言語選択 */}
                       <div className="px-4 py-2 border-b border-gray-200">
-                        <p className="text-xs font-semibold text-gray-600 mb-2">言語</p>
+                        <p className="text-xs font-semibold text-gray-600 mb-2">{t('language')}</p>
                         <div className="space-y-1">
                           {availableLanguages.map(lang => (
                             <button
                               key={lang}
                               type="button"
-                              onClick={() => {
-                                i18n.changeLanguage(lang);
+                              onClick={async () => {
+                                await i18n.changeLanguage(lang);
                                 setShowUserMenu(false);
                               }}
                               className={`block w-full text-left px-3 py-2 text-sm rounded transition ${
@@ -533,7 +533,7 @@ const HomePage: React.FC = () => {
                           }}
                           className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
                         >
-                          Googleでログイン
+                          {t('googleLoginButton')}
                         </button>
                       )}
                     </div>
@@ -560,10 +560,10 @@ const HomePage: React.FC = () => {
                 }`}
               >
                 {isSubmitting
-                  ? '送信中…'
+                  ? t('submitting')
                   : user
-                    ? `${newSelections.length} 人に投票を確定する`
-                    : `ログインして ${newSelections.length} 人に投票する`}
+                    ? t('confirmVotesButton', { count: newSelections.length })
+                    : t('loginAndVoteButton', { count: newSelections.length })}
               </button>
             </div>
           </div>
@@ -573,20 +573,33 @@ const HomePage: React.FC = () => {
 
         <Modal
           isOpen={showConfirmPopup}
-          title="この内容で投票しますか？"
-          isSubmitting={isSubmitting}
-          selectedCreators={creators.filter(c => newSelections.includes(c.creatorId))}
-          onConfirm={handleConfirmVote}
+          title={t('confirmVotesTitle')}
           onCancel={() => setShowConfirmPopup(false)}
+          buttons={[
+            {
+              label: isSubmitting ? t('submitting') : t('confirmVotesButtonLabel'),
+              onClick: handleConfirmVote,
+              variant: 'primary' as const,
+              loading: isSubmitting,
+              disabled: isSubmitting,
+            },
+            {
+              label: t('cancelButton'),
+              onClick: () => setShowConfirmPopup(false),
+              variant: 'secondary' as const,
+              disabled: isSubmitting,
+            },
+          ]}
+          selectedCreators={creators.filter(c => newSelections.includes(c.creatorId))}
         />
 
         <Modal
           isOpen={showLoginModal}
-          title="ログインが必要です"
+          title={t('loginRequired')}
           onCancel={() => setShowLoginModal(false)}
           buttons={[
             {
-              label: 'Googleでログイン',
+              label: t('googleLoginButton'),
               onClick: async () => {
                 try {
                   await signInWithGoogle();
@@ -598,43 +611,43 @@ const HomePage: React.FC = () => {
               variant: 'primary' as const,
             },
             {
-              label: 'キャンセル',
+              label: t('cancelButton'),
               onClick: () => setShowLoginModal(false),
               variant: 'secondary' as const,
             },
           ]}
         >
-          <p className="text-sm text-gray-600">投票するにはGoogleアカウントでログインしてください。</p>
+          <p className="text-sm text-gray-600">{t('loginRequiredText')}</p>
         </Modal>
 
         <Modal
           isOpen={showNoVotesModal}
-          title="残票がありません"
+          title={t('noVotesLeftTitle')}
           onCancel={() => setShowNoVotesModal(false)}
           buttons={[
             {
-              label: '了解',
+              label: t('okButton'),
               onClick: () => setShowNoVotesModal(false),
               variant: 'primary' as const,
             },
           ]}
         >
-          <p className="text-sm text-gray-600">今日の投票数の上限に達しています。翌日以降に投票できます。</p>
+          <p className="text-sm text-gray-600">{t('noVotesLeftText')}</p>
         </Modal>
 
         <Modal
           isOpen={showAlreadyVotedModal}
-          title="本日投票済みです"
+          title={t('alreadyVotedTitle')}
           onCancel={() => setShowAlreadyVotedModal(false)}
           buttons={[
             {
-              label: '了解',
+              label: t('okButton'),
               onClick: () => setShowAlreadyVotedModal(false),
               variant: 'primary' as const,
             },
           ]}
         >
-          <p className="text-sm text-gray-600">このクリエイターには本日投票済みです。翌日以降に再度投票できます。</p>
+          <p className="text-sm text-gray-600">{t('alreadyVotedText')}</p>
         </Modal>
       </div>
     </div>

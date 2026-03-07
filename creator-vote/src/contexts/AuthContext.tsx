@@ -3,6 +3,7 @@ import { User, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/aut
 
 import { auth, googleProvider, isFirebaseConfigured } from '../firebase';
 import { login, LoginResponse } from '../services/loginService';
+import i18n from '../i18n';
 
 export type AuthState = {
   /** Firebase user object (null when not signed in) */
@@ -44,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoginInfo(response);
     } catch (error) {
       console.error('Backend login failed:', error);
-      setLoginError(error instanceof Error ? error.message : 'ログイン時にサーバーエラーが発生しました。');
+      setLoginError(error instanceof Error ? error.message : i18n.t('backendLoginError'));
       setLoginInfo(null);
     }
   }, []);

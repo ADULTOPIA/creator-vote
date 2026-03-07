@@ -6,8 +6,10 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import zhTW from './locales/zh-TW.json';
 import ja from './locales/ja.json';
 import ko from './locales/ko.json';
+import en from './locales/en.json';
 
 const resources = {
+  en: { translation: en },
   'zh-TW': { translation: zhTW },
   ja: { translation: ja },
   ko: { translation: ko },
@@ -15,6 +17,7 @@ const resources = {
 
 // 言語表示名のマッピング
 export const languageNames: Record<string, string> = {
+  en: 'English',
   'zh-TW': '繁體中文',
   ja: '日本語',
   ko: '한국어',
@@ -31,6 +34,8 @@ i18n
     fallbackLng: 'zh-TW',
     interpolation: {
       escapeValue: false,
+      prefix: '{{',
+      suffix: '}}',
     },
     detection: {
       order: ['querystring', 'localStorage', 'navigator'],

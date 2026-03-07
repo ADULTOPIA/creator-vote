@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import './i18n'; // i18n を初期化
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 

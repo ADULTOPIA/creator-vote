@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Creator } from '../types/creator';
 import SmallCreatorCard from './SmallCreatorCard';
@@ -63,6 +64,7 @@ const Modal: React.FC<ModalProps> = ({
   onCancel,
   scrollable = false,
 }) => {
+  const { t } = useTranslation();
   React.useEffect(() => {
     if (!isOpen) return;
     const previousBodyOverflow = document.body.style.overflow;
@@ -90,14 +92,14 @@ const Modal: React.FC<ModalProps> = ({
     selectedCreators && onConfirm && onCancel
       ? [
           {
-            label: isSubmitting ? '送信中…' : '投票を確定する',
+            label: isSubmitting ? t('submitting') : t('confirmVotesButtonLabel'),
             onClick: onConfirm,
             variant: 'primary' as const,
             loading: isSubmitting,
             disabled: isSubmitting,
           },
           {
-            label: 'キャンセル',
+            label: t('cancelButton'),
             onClick: onCancel,
             variant: 'secondary' as const,
             disabled: isSubmitting,
@@ -162,7 +164,7 @@ const Modal: React.FC<ModalProps> = ({
               disabled={button.disabled}
               className={`rounded-full px-6 py-2 font-semibold shadow transition bg-[#FF69B4] text-white hover:brightness-105 disabled:bg-gray-400`}
             >
-              {button.loading ? '送信中…' : button.label}
+              {button.loading ? t('submitting') : button.label}
             </button>
           ))}
         </div>
