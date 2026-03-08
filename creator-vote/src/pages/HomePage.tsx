@@ -32,6 +32,7 @@ const HomePage: React.FC = () => {
   const [showLoginModal, setShowLoginModal] = React.useState(false);
   const [showNoVotesModal, setShowNoVotesModal] = React.useState(false);
   const [showAlreadyVotedModal, setShowAlreadyVotedModal] = React.useState(false);
+  const [showAccountBlockedModal, setShowAccountBlockedModal] = React.useState(false);
   const [floatingHearts, setFloatingHearts] = React.useState<Array<{ id: string; x: number; y: number; size: 'large' | 'small'; duration: number }>>([]);
   const [showUserMenu, setShowUserMenu] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
@@ -101,6 +102,10 @@ const HomePage: React.FC = () => {
 
     return () => controller.abort();
   }, [refreshToken, user]);
+
+  React.useEffect(() => {
+    if (isBlocked) setShowAccountBlockedModal(true);
+  }, [isBlocked]);
 
   const retryFetch = () => {
     setSelectedIds([]);
@@ -283,43 +288,7 @@ const HomePage: React.FC = () => {
       );
     }
 
-    if (loginError) {
-      return (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-          <p className="text-sm text-red-600">{loginError}</p>
-          <button
-            type="button"
-            onClick={clearLoginError}
-            className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700"
-          >
-            {t('closeButton')}
-          </button>
-        </div>
-      );
-    }
-
-    if (isBlocked) {
-      return (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-          <p className="text-sm text-red-600">{t('accountBlockedFull')}</p>
-        </div>
-      );
-    }
-
-    if (errorMessage) {
-      return (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-          <p className="text-sm text-red-600">{errorMessage}</p>
-          <button
-            type="button"
-            onClick={retryFetch}
-            className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700"
-          >
-            {t('retryButton')}
-          </button>
-        </div>
-      );
-    }
+    // Errors and notifications are shown via modals; continue rendering main content.
 
     if (!creators.length) {
       return (
@@ -335,18 +304,6 @@ const HomePage: React.FC = () => {
 
     return (
       <div className="flex flex-col gap-6">
-        {submitMessage && (
-          <div
-            className={`rounded-2xl border p-4 shadow-sm ${
-              submitMessage.type === 'success'
-                ? 'border-green-200 bg-green-50 text-green-700'
-                : 'border-red-200 bg-red-50 text-red-700'
-            }`}
-          >
-            <p className="text-sm font-medium">{submitMessage.text}</p>
-          </div>
-        )}
-
         {lockedIds.length > 0 && (
           <section className="rounded-2xl border border-pink-100 bg-white/80 p-4 shadow-sm">
             <p className="text-sm font-semibold text-pink-500">
@@ -648,6 +605,78 @@ const HomePage: React.FC = () => {
           ]}
         >
           <p className="text-sm text-gray-600">{t('alreadyVotedText')}</p>
+        </Modal>
+
+        {/* Notification modal for submit results */}
+        <Modal
+          isOpen={!!submitMessage}
+          title={submitMessage?.type === 'success' ? t('success') : t('error')}
+          onCancel={() => setSubmitMessage(null)}
+          buttons={[
+            {
+              label: t('okButton'),
+              onClick: () => setSubmitMessage(null),
+              variant: 'primary' as const,
+            },
+          ]}
+        >
+          <p className="text-sm text-gray-600">{submitMessage?.text}</p>
+        </Modal>
+
+        {/* General error modal (fetch errors, etc.) */}
+        <Modal
+          isOpen={!!errorMessage}
+          title={t('error')}
+          onCancel={() => setErrorMessage(null)}
+          buttons={[
+            {
+              label: t('retryButton'),
+              onClick: () => {
+                retryFetch();
+                setErrorMessage(null);
+              },
+              variant: 'primary' as const,
+            },
+            {
+              label: t('cancelButton'),
+              onClick: () => setErrorMessage(null),
+              variant: 'secondary' as const,
+            },
+          ]}
+        >
+          <p className="text-sm text-gray-600">{errorMessage}</p>
+        </Modal>
+
+        {/* Login error from auth context */}
+        <Modal
+          isOpen={!!loginError}
+          title={t('loginError')}
+          onCancel={clearLoginError}
+          buttons={[
+            {
+              label: t('closeButton'),
+              onClick: clearLoginError,
+              variant: 'primary' as const,
+            },
+          ]}
+        >
+          <p className="text-sm text-gray-600">{loginError}</p>
+        </Modal>
+
+        {/* Account blocked modal shown once when detected */}
+        <Modal
+          isOpen={showAccountBlockedModal}
+          title={t('accountBlocked')}
+          onCancel={() => setShowAccountBlockedModal(false)}
+          buttons={[
+            {
+              label: t('okButton'),
+              onClick: () => setShowAccountBlockedModal(false),
+              variant: 'primary' as const,
+            },
+          ]}
+        >
+          <p className="text-sm text-gray-600">{t('accountBlockedFull')}</p>
         </Modal>
       </div>
     </div>
