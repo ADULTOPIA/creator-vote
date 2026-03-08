@@ -33,6 +33,7 @@ const HomePage: React.FC = () => {
   const [showNoVotesModal, setShowNoVotesModal] = React.useState(false);
   const [showAlreadyVotedModal, setShowAlreadyVotedModal] = React.useState(false);
   const [showAccountBlockedModal, setShowAccountBlockedModal] = React.useState(false);
+  const [showNoCreatorsModal, setShowNoCreatorsModal] = React.useState(false);
   const [floatingHearts, setFloatingHearts] = React.useState<Array<{ id: string; x: number; y: number; size: 'large' | 'small'; duration: number }>>([]);
   const [showUserMenu, setShowUserMenu] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
@@ -106,6 +107,14 @@ const HomePage: React.FC = () => {
   React.useEffect(() => {
     if (isBlocked) setShowAccountBlockedModal(true);
   }, [isBlocked]);
+
+  React.useEffect(() => {
+    if (!isLoading && !errorMessage && creators.length === 0) {
+      setShowNoCreatorsModal(true);
+    } else {
+      setShowNoCreatorsModal(false);
+    }
+  }, [isLoading, errorMessage, creators]);
 
   const retryFetch = () => {
     setSelectedIds([]);
@@ -312,15 +321,6 @@ const HomePage: React.FC = () => {
       );
     }
 
-    // Errors and notifications are shown via modals; continue rendering main content.
-
-    if (!creators.length) {
-      return (
-        <div className="flex flex-1 flex-col items-center justify-center text-center text-sm text-gray-600">
-          {t('noCreatorsFound')}
-        </div>
-      );
-    }
 
     const votedCreators = lockedIds
       .map(id => creators.find(creator => creator.creatorId === id))
@@ -614,6 +614,29 @@ const HomePage: React.FC = () => {
           ]}
         >
           <p className="text-sm text-gray-600">{t('noVotesLeftText')}</p>
+        </Modal>
+
+        <Modal
+          isOpen={showNoCreatorsModal}
+          title={t('noCreatorsFound')}
+          onCancel={() => setShowNoCreatorsModal(false)}
+          buttons={[
+            {
+              label: t('retryButton'),
+              onClick: () => {
+                retryFetch();
+                setShowNoCreatorsModal(false);
+              },
+              variant: 'primary' as const,
+            },
+            {
+              label: t('cancelButton'),
+              onClick: () => setShowNoCreatorsModal(false),
+              variant: 'secondary' as const,
+            },
+          ]}
+        >
+          <p className="text-sm text-gray-600">{t('noCreatorsFound')}</p>
         </Modal>
 
         <Modal
