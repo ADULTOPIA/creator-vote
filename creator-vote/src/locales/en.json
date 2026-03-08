@@ -8,6 +8,7 @@
   "closeButton": "Close",
   "accountBlockedFull": "Your account is blocked. You cannot perform any actions.",
   "retryButton": "Retry",
+  "reloadButton": "Reload",
   "noCreatorsFound": "No active creators found.",
   "votedToday": "You have already voted for",
   "votedTickets": "creators today",

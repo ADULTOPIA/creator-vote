@@ -8,6 +8,7 @@
   "closeButton": "閉じる",
   "accountBlockedFull": "アカウントがブロックされています。操作を行うことができません。",
   "retryButton": "再試行",
+  "reloadButton": "再読み込み",
   "noCreatorsFound": "公開中のクリエイターが見つかりません。",
   "votedToday": "本日すでに",
   "votedTickets": "票 投票済みです",

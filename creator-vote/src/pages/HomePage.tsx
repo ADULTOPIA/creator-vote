@@ -27,7 +27,7 @@ const HomePage: React.FC = () => {
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [refreshToken, setRefreshToken] = React.useState(0);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [submitMessage, setSubmitMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [submitMessage, setSubmitMessage] = React.useState<{ type: 'success' | 'error'; text: string; code?: string; status?: number } | null>(null);
   const [showConfirmPopup, setShowConfirmPopup] = React.useState(false);
   const [showLoginModal, setShowLoginModal] = React.useState(false);
   const [showNoVotesModal, setShowNoVotesModal] = React.useState(false);
@@ -253,22 +253,46 @@ const HomePage: React.FC = () => {
           case 403:
             setSubmitMessage({ type: 'error', text: t('accountBlocked') });
             break;
-          case 400:
+          case 400: {
+            const isRuleViolation = (error.code || '') === 'VOTE_RULE_VIOLATION';
             setSubmitMessage({
               type: 'error',
-              text: error.message || t('votingRuleViolation'),
+              text: isRuleViolation ? t('votingRuleViolation') : (error.message || t('votingRuleViolation')),
+              code: isRuleViolation ? 'VOTE_RULE_VIOLATION' : error.code,
+              status: error.status,
             });
             break;
+          }
           default:
             setSubmitMessage({
               type: 'error',
               text: t('serverError'),
+              status: error.status,
             });
         }
       } else {
+        // Try to detect structured server error messages like { error: 'INTERNAL_ERROR' }
+        let parsedCode: string | undefined;
+        let displayText = t('votingError');
+        if (error instanceof Error) {
+          displayText = error.message;
+          try {
+            const parsed = JSON.parse(error.message);
+            if (parsed && typeof parsed === 'object' && 'error' in parsed) {
+              parsedCode = (parsed as any).error;
+              if (parsedCode === 'INTERNAL_ERROR') {
+                displayText = t('serverError');
+              }
+            }
+          } catch {
+            // not JSON — keep raw message
+          }
+        }
+
         setSubmitMessage({
           type: 'error',
-          text: error instanceof Error ? error.message : t('votingError'),
+          text: displayText,
+          code: parsedCode,
         });
       }
     } finally {
@@ -612,13 +636,33 @@ const HomePage: React.FC = () => {
           isOpen={!!submitMessage}
           title={submitMessage?.type === 'success' ? t('success') : t('error')}
           onCancel={() => setSubmitMessage(null)}
-          buttons={[
-            {
-              label: t('okButton'),
-              onClick: () => setSubmitMessage(null),
-              variant: 'primary' as const,
-            },
-          ]}
+          buttons={
+            // VOTE_RULE_VIOLATION -> force reload
+            submitMessage?.type === 'error' && submitMessage?.code === 'VOTE_RULE_VIOLATION'
+              ? [
+                  {
+                    label: t('reloadButton'),
+                    onClick: () => window.location.reload(),
+                    variant: 'primary' as const,
+                    disabled: isSubmitting,
+                  },
+                ]
+              : [
+                  {
+                    label: t('retryButton'),
+                    onClick: () => handleConfirmVote(),
+                    variant: 'primary' as const,
+                    loading: isSubmitting,
+                    disabled: isSubmitting,
+                  },
+                  {
+                    label: t('okButton'),
+                    onClick: () => setSubmitMessage(null),
+                    variant: 'secondary' as const,
+                    disabled: isSubmitting,
+                  },
+                ]
+          }
         >
           <p className="text-sm text-gray-600">{submitMessage?.text}</p>
         </Modal>

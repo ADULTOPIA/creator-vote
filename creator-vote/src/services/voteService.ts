@@ -35,17 +35,21 @@ export const submitVotes = async (
   });
 
   if (!response.ok) {
-    let errorBody: ApiErrorBody = {};
+    let errorBody: ApiErrorBody | any = {};
     try {
-      errorBody = (await response.json()) as ApiErrorBody;
+      errorBody = (await response.json()) as ApiErrorBody | any;
     } catch {
       // ignore parse failure
     }
 
+    // Some backend responses use `error` field instead of `code`.
+    const codeFromBody: string | undefined = errorBody.code ?? errorBody.error;
+    const messageFromBody: string | undefined = errorBody.message ?? errorBody.errorMessage ?? undefined;
+
     throw new VoteApiError(
       response.status,
-      errorBody.code,
-      errorBody.message ?? `投票に失敗しました (status ${response.status})`,
+      codeFromBody,
+      messageFromBody ?? `投票に失敗しました (status ${response.status})`,
     );
   }
 

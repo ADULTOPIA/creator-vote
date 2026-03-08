@@ -8,6 +8,7 @@
   "closeButton": "닫기",
   "accountBlockedFull": "계정이 차단되었습니다. 작업을 수행할 수 없습니다.",
   "retryButton": "재시도",
+  "reloadButton": "새로고침",
   "noCreatorsFound": "활성화된 크리에이터를 찾을 수 없습니다.",
   "votedToday": "이미",
   "votedTickets": "명에게 투표했습니다",
