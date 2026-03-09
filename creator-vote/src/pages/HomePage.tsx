@@ -478,10 +478,13 @@ const HomePage: React.FC = () => {
 
                 {/* ドロップダウンメニュー */}
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-lg bg-white border border-gray-200 shadow-lg z-50">
-                    <div className="py-2">
+                  <div
+                    className="absolute right-0 mt-2 w-48 rounded-lg bg-white/90 backdrop-blur-md border border-gray-200/60 shadow-lg z-50 overflow-hidden"
+                    style={{ backdropFilter: 'saturate(120%) blur(6px)' }}
+                  >
+                    <div className="py-2 bg-gradient-to-b from-white/40 to-white/20">
                       {/* 言語選択 */}
-                      <div className="px-4 py-2 border-b border-gray-200">
+                      <div className="px-4 py-2 border-b border-gray-200/30">
                         <p className="text-xs font-semibold text-gray-600 mb-2">{t('language')}</p>
                         <div className="space-y-1">
                           {availableLanguages.map(lang => (
@@ -492,10 +495,10 @@ const HomePage: React.FC = () => {
                                 await i18n.changeLanguage(lang);
                                 setShowUserMenu(false);
                               }}
-                              className={`block w-full text-left px-3 py-2 text-sm rounded transition ${
+                              className={`block w-full text-left px-3 py-2 text-sm rounded transition-colors duration-150 ${
                                 i18n.language === lang
                                   ? 'bg-pink-50 text-pink-600 font-semibold'
-                                  : 'text-gray-700 hover:bg-gray-100'
+                                  : 'text-gray-700 hover:bg-white/30'
                               }`}
                             >
                               {languageNames[lang]}
@@ -512,7 +515,7 @@ const HomePage: React.FC = () => {
                             signInWithGoogle();
                             setShowUserMenu(false);
                           }}
-                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-white/30 transition-colors duration-150"
                         >
                           {t('googleLoginButton')}
                         </button>
