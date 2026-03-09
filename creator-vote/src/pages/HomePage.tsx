@@ -8,6 +8,7 @@ import { fetchUserVotesToday } from '../services/userVoteService';
 import { submitVotes, VoteApiError } from '../services/voteService';
 import { Creator } from '../types/creator';
 import Modal from '../components/Modal';
+import Loading from '../components/Loading';
 import SmallCreatorCard from '../components/SmallCreatorCard';
 import Footer from '../components/Footer';
 import FloatingHeart from '../components/FloatingHeart';
@@ -88,6 +89,8 @@ const HomePage: React.FC = () => {
         setCreators(shuffled);
         setLockedIds(todayVotes.creatorIds);
         setSelectedIds(todayVotes.creatorIds);
+        // 成功時は以前のエラーメッセージをクリアする
+        setErrorMessage(null);
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') {
           return;
@@ -348,13 +351,7 @@ const HomePage: React.FC = () => {
 
   const renderContent = () => {
     if (authLoading || isLoading) {
-      return (
-        <div className="flex flex-1 items-center justify-center">
-          <p className="text-sm text-gray-600">
-            {authLoading ? t('authChecking') : t('loadingCreators')}
-          </p>
-        </div>
-      );
+      return <Loading message={authLoading ? t('authChecking') : t('loadingCreators')} />;
     }
 
 

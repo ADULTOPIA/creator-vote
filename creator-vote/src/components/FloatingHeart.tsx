@@ -8,14 +8,15 @@ interface FloatingHeartProps {
   onComplete: (id: string) => void;
   size?: 'large' | 'small';
   duration?: number;
+  zIndex?: number;
 }
 
-const HeartContainer = styled.div<{ x: number; y: number; duration: number; size: 'large' | 'small' }>`
+const HeartContainer = styled.div<{ x: number; y: number; duration: number; size: 'large' | 'small'; zIndex?: number }>`
   position: fixed;
   left: ${props => props.x}px;
   top: ${props => props.y}px;
   pointer-events: none;
-  z-index: ${props => props.size === 'large' ? 100 : 50};
+  z-index: ${props => (typeof props.zIndex === 'number' ? props.zIndex : (props.size === 'large' ? 100 : 50))};
   will-change: transform, opacity;
   backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
@@ -36,7 +37,7 @@ const HeartContainer = styled.div<{ x: number; y: number; duration: number; size
   }
 `;
 
-const FloatingHeart: React.FC<FloatingHeartProps> = ({ x, y, id, onComplete, size = 'large', duration = 1.5 }) => {
+const FloatingHeart: React.FC<FloatingHeartProps> = ({ x, y, id, onComplete, size = 'large', duration = 1.5, zIndex }) => {
   React.useEffect(() => {
     const timer = setTimeout(() => {
       onComplete(id);
@@ -48,7 +49,7 @@ const FloatingHeart: React.FC<FloatingHeartProps> = ({ x, y, id, onComplete, siz
   const heartSize = size === 'large' ? '40px' : '12px';
 
   return (
-    <HeartContainer x={x} y={y} duration={duration} size={size}>
+    <HeartContainer x={x} y={y} duration={duration} size={size} zIndex={zIndex}>
       <img
         src={`${process.env.PUBLIC_URL}/adultopia/logoHeart.png`}
         alt=""
