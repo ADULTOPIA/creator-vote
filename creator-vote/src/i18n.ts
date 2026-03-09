@@ -31,6 +31,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
+    lng: 'zh-TW',
     fallbackLng: 'zh-TW',
     interpolation: {
       escapeValue: false,
