@@ -1,5 +1,5 @@
-import React, { Suspense } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { Suspense, useEffect } from 'react';
+import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
@@ -11,6 +11,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { theme } from './styles/theme';
 import { GlobalStyle } from './styles/GlobalStyle';
 import HomePage from './pages/HomePage';
+import analytics from './services/analytics';
 
 const Main = styled.main`
   background-color: ${({ theme }) => theme.colors.white};
@@ -19,6 +20,12 @@ const Main = styled.main`
 function AppContent() {
   const { t } = useTranslation();
   const faviconHref = `${process.env.PUBLIC_URL}/favicon.ico`;
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = `${location.pathname}${location.search}${location.hash}`;
+    analytics.pageview(path);
+  }, [location]);
 
   return (
     <>
