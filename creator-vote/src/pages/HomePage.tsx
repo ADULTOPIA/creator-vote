@@ -56,6 +56,7 @@ const HomePage: React.FC = () => {
   }, [showUserMenu]);
 
   React.useEffect(() => {
+    if (authLoading) return; // 認証状態が確定するまで待つ
     const controller = new AbortController();
 
     const loadPageData = async () => {
@@ -112,7 +113,7 @@ const HomePage: React.FC = () => {
     loadPageData();
 
     return () => controller.abort();
-  }, [refreshToken, user, t]);
+  }, [refreshToken, user, t, authLoading]);
 
   React.useEffect(() => {
     if (isBlocked) setShowAccountBlockedModal(true);
