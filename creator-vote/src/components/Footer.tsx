@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import Modal from './Modal';
+import analytics from '../services/analytics';
 
 const FooterContainer = styled.footer`
   width: 100%;
@@ -35,20 +36,38 @@ const Footer = () => {
       <FooterText>
         <button
           style={{ background: 'none', border: 'none', color: '#575757', textDecoration: 'underline', cursor: 'pointer', fontSize: 14, padding: 0 }}
-          onClick={() => setShowTerms(true)}
+          onClick={() => {
+            analytics.event({
+              action: 'terms_button_click',
+              category: 'engagement',
+            });
+            setShowTerms(true);
+          }}
         >
           {t('termsButton')}
         </button>
         <button
           style={{ background: 'none', border: 'none', color: '#575757', textDecoration: 'underline', cursor: 'pointer', fontSize: 14, padding: 0 }}
-          onClick={() => setShowPolicy(true)}
+          onClick={() => {
+            analytics.event({
+              action: 'privacy_button_click',
+              category: 'engagement',
+            });
+            setShowPolicy(true);
+          }}
         >
           {t('privacyButton')}
         </button>
 
         <button
           style={{ background: 'none', border: 'none', color: '#575757', textDecoration: 'underline', cursor: 'pointer', fontSize: 14, padding: 0 }}
-          onClick={() => window.open('https://mimictype.com/', '_blank', 'noopener,noreferrer')}
+          onClick={() => {
+            analytics.event({
+              action: 'mimictype_button_click',
+              category: 'engagement',
+            });
+            window.open('https://mimictype.com/', '_blank', 'noopener,noreferrer');
+          }}
         >
           {t('copyright')}
         </button>

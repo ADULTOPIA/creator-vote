@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../contexts/AuthContext';
+import analytics from '../services/analytics';
 import { fetchCreators } from '../services/creatorService';
 import { fetchUserVotesToday } from '../services/userVoteService';
 import { submitVotes, VoteApiError } from '../services/voteService';
@@ -93,6 +94,12 @@ const HomePage: React.FC = () => {
         }
 
         const fallbackMessage = error instanceof Error ? error.message : t('unknownError');
+        // Track fetch error
+        analytics.event({
+          action: 'load_error',
+          category: 'errors',
+          label: fallbackMessage.substring(0, 50),
+        });
         setErrorMessage(fallbackMessage);
       } finally {
         setIsLoading(false);
@@ -102,7 +109,7 @@ const HomePage: React.FC = () => {
     loadPageData();
 
     return () => controller.abort();
-  }, [refreshToken, user]);
+  }, [refreshToken, user, t]);
 
   React.useEffect(() => {
     if (isBlocked) setShowAccountBlockedModal(true);
@@ -183,6 +190,16 @@ const HomePage: React.FC = () => {
       return;
     }
 
+    // Track creator tap event
+    const creator = creators.find(c => c.creatorId === id);
+    if (creator) {
+      analytics.event({
+        action: 'creator_tap',
+        category: 'engagement',
+        label: creator.displayName,
+      });
+    }
+
     setSelectedIds(prev => {
       if (prev.includes(id)) {
         return prev.filter(item => item !== id);
@@ -202,6 +219,12 @@ const HomePage: React.FC = () => {
   // Show confirmation popup instead of submitting immediately
   const handleVoteClick = () => {
     if (newSelections.length === 0) return;
+    // Track vote button click
+    analytics.event({
+      action: 'vote_button_click',
+      category: 'engagement',
+      value: newSelections.length,
+    });
     setShowConfirmPopup(true);
   };
 
@@ -226,6 +249,13 @@ const HomePage: React.FC = () => {
       const idToken = await getIdToken();
       const result = await submitVotes(idToken, newSelections);
 
+      // Track successful vote submission
+      analytics.event({
+        action: 'vote_submitted',
+        category: 'engagement',
+        value: result.acceptedCreatorIds.length,
+      });
+
       setLockedIds(prev => [...prev, ...result.acceptedCreatorIds]);
       setCreators(prev => prev.map(creator =>
         result.acceptedCreatorIds.includes(creator.creatorId)
@@ -236,6 +266,12 @@ const HomePage: React.FC = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       if (error instanceof VoteApiError) {
+        // Track voting errors
+        analytics.event({
+          action: 'vote_error',
+          category: 'errors',
+          label: `HTTP ${error.status}: ${error.code || 'unknown'}`,
+        });
         switch (error.status) {
           case 401:
             setSubmitMessage({
@@ -492,6 +528,12 @@ const HomePage: React.FC = () => {
                               key={lang}
                               type="button"
                               onClick={async () => {
+                                // Track language selection event
+                                analytics.event({
+                                  action: 'language_changed',
+                                  category: 'engagement',
+                                  label: lang,
+                                });
                                 await i18n.changeLanguage(lang);
                                 setShowUserMenu(false);
                               }}

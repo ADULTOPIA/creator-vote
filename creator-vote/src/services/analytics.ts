@@ -25,7 +25,9 @@ export function event({ action, category, label, value }: { action: string; cate
   }
 }
 
-export default {
+const analyticsDefault = {
   pageview,
   event,
 };
+
+export default analyticsDefault;
