@@ -113,7 +113,7 @@ const HomePage: React.FC = () => {
     loadPageData();
 
     return () => controller.abort();
-  }, [refreshToken, user, t, authLoading]);
+  }, [refreshToken, user, authLoading]);
 
   React.useEffect(() => {
     if (isBlocked) setShowAccountBlockedModal(true);
