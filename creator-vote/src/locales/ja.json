@@ -26,6 +26,7 @@
   "votes": "票",
   "language": "言語",
   "googleLoginButton": "Googleでログイン",
+  "googleLogoutButton": "ログアウト",
   "submitting": "送信中…",
   "confirmVotesButton": "{{count}} 人に投票を確定する",
   "loginAndVoteButton": "ログインして {{count}} 人に投票する",
@@ -45,7 +46,7 @@
   "termsTitle": "利用規約",
   "privacyTitle": "プライバシーポリシー",
   "privacyContent": "<ol style='padding-left: 18px;'><li style='margin-bottom: 8px;'><strong>取得する情報</strong><br />当サイトでは、サービス提供のために以下の情報を取得する場合があります。<br /><ul><li>Googleログインにより取得されるユーザー識別情報（UID）</li><li>サービス利用に関する情報（投票履歴など）</li><li>アクセスログ、IPアドレス等の技術情報</li></ul></li><li style='margin-bottom: 8px;'><strong>利用目的</strong><br />取得した情報は、以下の目的のために利用します。<ul><li>ユーザー認証およびアカウント管理</li><li>投票機能の提供</li><li>サービスの改善および不正利用の防止</li><li>システムの安全性確保</li></ul></li><li style='margin-bottom: 8px;'><strong>使用している外部サービス</strong><br />当サイトでは、以下の外部サービスを利用しています。<br /><ul><li>Google Authentication（ユーザー認証）</li><li>Firebase（データベースおよびインフラ）</li></ul>これらのサービス提供者は、それぞれのプライバシーポリシーに基づいて情報を管理します。</li><li style='margin-bottom: 8px;'><strong>個人情報の第三者提供</strong><br />当サイトは、法令に基づく場合を除き、取得した情報を第三者に提供することはありません。</li><li style='margin-bottom: 8px;'><strong>セキュリティ</strong><br />当サイトでは、不正アクセスや情報漏洩を防止するため、適切なセキュリティ対策を実施します。</li><li style='margin-bottom: 8px;'><strong>プライバシーポリシーの変更</strong><br />本ポリシーの内容は、必要に応じて変更されることがあります。</li><li style='margin-bottom: 8px;'><strong>お問い合わせ</strong><br />本ポリシーに関するお問い合わせは、当サイトの運営者までご連絡ください。</li></ol>",
-  "termsContent": "<p>本サイト（以下、「当サイト」）を利用することにより、ユーザーは本利用規約に同意したものとみなします。</p><br /><ol style='padding-left: 18px;'><li style='margin-bottom: 8px;'><strong>サービス内容</strong><br />当サイトは、クリエイターに対する投票機能を提供するサービスです。</li><li style='margin-bottom: 8px;'><strong>禁止行為</strong><br />ユーザーは以下の行為を行ってはなりません。<ul><li>不正な手段による投票</li><li>複数アカウントによる投票操作</li><li>サービスの運営を妨害する行為</li><li>法令または公序良俗に反する行為</li></ul></li><li style='margin-bottom: 8px;'><strong>投票について</strong><br />運営は、不正投票または不適切な投票と判断した場合、投票の削除または調整を行う権利を有します。</li><li style='margin-bottom: 8px;'><strong>サービスの変更</strong><br />運営は、事前の通知なくサービス内容を変更または停止する場合があります。</li><li style='margin-bottom: 8px;'><strong>免責事項</strong><br />当サイトの利用によって生じたいかなる損害についても、運営は責任を負いません。</li><li style='margin-bottom: 8px;'><strong>規約の変更</strong><br />本利用規約は、必要に応じて変更される場合があります。</li></ol>",
+  "termsContent": "<p>本サイト（以下、「当サイト」）を利用することにより、ユーザーは本利用規約に同意したものとみなします。</p><br /><ol style='padding-left: 18px;'><li style='margin-bottom: 8px;'><strong>サービス内容</strong><br />当サイトは、クリエイターに対する投票機能を提供するサービスです。</li><li style='margin-bottom: 8px;'><strong>禁止行為</strong><br />ユーザーは以下の行為を行ってはなりません。<ul><li>不正な手段による投票</li><li>サービスの運営を妨害する行為</li><li>法令または公序良俗に反する行為</li></ul></li><li style='margin-bottom: 8px;'><strong>投票について</strong><br />運営は、不正投票または不適切な投票と判断した場合、投票の削除または調整を行う権利を有します。</li><li style='margin-bottom: 8px;'><strong>サービスの変更</strong><br />運営は、事前の通知なくサービス内容を変更または停止する場合があります。</li><li style='margin-bottom: 8px;'><strong>免責事項</strong><br />当サイトの利用によって生じたいかなる損害についても、運営は責任を負いません。</li><li style='margin-bottom: 8px;'><strong>規約の変更</strong><br />本利用規約は、必要に応じて変更される場合があります。</li></ol>",
   "unknownError": "不明なエラーが発生しました。",
   "backendLoginError": "ログイン時にサーバーエラーが発生しました。"
 }

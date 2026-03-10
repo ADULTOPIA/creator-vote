@@ -26,6 +26,7 @@
   "votes": "표",
   "language": "언어",
   "googleLoginButton": "Google로 로그인",
+  "googleLogoutButton": "로그아웃",
   "submitting": "제출 중...",
   "confirmVotesButton": "{{count}}명에게 투표 확정",
   "loginAndVoteButton": "로그인하여 {{count}}명에게 투표",
@@ -45,7 +46,7 @@
   "termsTitle": "이용약관",
   "privacyTitle": "개인정보처리방침",
   "privacyContent": "<ol style='padding-left: 18px;'><li style='margin-bottom: 8px;'><strong>수집하는 정보</strong><br />당 사이트는 서비스 제공을 위해 다음 정보를 수집할 수 있습니다:<br /><ul><li>Google 로그인으로 획득한 사용자 식별 정보(UID)</li><li>서비스 이용 관련 정보(투표 이력 등)</li><li>접근 로그, IP 주소 등의 기술 정보</li></ul></li><li style='margin-bottom: 8px;'><strong>이용 목적</strong><br />수집한 정보는 다음 목적으로 이용됩니다:<ul><li>사용자 인증 및 계정 관리</li><li>투표 기능 제공</li><li>서비스 개선 및 부정 이용 방지</li><li>시스템 보안 확보</li></ul></li><li style='margin-bottom: 8px;'><strong>사용하는 외부 서비스</strong><br />당 사이트는 다음 외부 서비스를 이용합니다:<br /><ul><li>Google Authentication(사용자 인증)</li><li>Firebase(데이터베이스 및 인프라)</li></ul>이들 서비스 제공자는 각각의 개인정보처리방침에 따라 정보를 관리합니다.</li><li style='margin-bottom: 8px;'><strong>개인정보의 제3자 제공</strong><br />당 사이트는 법령에 근거한 경우를 제외하고 수집한 정보를 제3자에게 제공하지 않습니다.</li><li style='margin-bottom: 8px;'><strong>보안</strong><br />당 사이트는 부정 접근 및 정보 유출을 방지하기 위해 적절한 보안 조치를 시행합니다.</li><li style='margin-bottom: 8px;'><strong>개인정보처리방침의 변경</strong><br />본 방침의 내용은 필요에 따라 변경될 수 있습니다.</li><li style='margin-bottom: 8px;'><strong>문의</strong><br />본 방침에 관한 문의는 당 사이트의 운영자로 연락해 주세요.</li></ol>",
-  "termsContent": "<p>본 사이트를 이용함으로써 이용자는 본 이용약관에 동의한 것으로 간주됩니다.</p><br /><ol style='padding-left: 18px;'><li style='margin-bottom: 8px;'><strong>서비스 내용</strong><br />본 사이트는 크리에이터에 대한 투표 기능을 제공하는 서비스입니다.</li><li style='margin-bottom: 8px;'><strong>금지 행위</strong><br />이용자는 다음 행위를 해서는 안 됩니다:<ul><li>부정한 수단에 의한 투표</li><li>복수 계정에 의한 투표 조작</li><li>서비스 운영을 방해하는 행위</li><li>법령 또는 공서양속에 반하는 행위</li></ul></li><li style='margin-bottom: 8px;'><strong>투표에 대하여</strong><br />운영은 부정 투표 또는 부적절한 투표라고 판단한 경우 투표의 삭제 또는 조정을 할 권리를 가집니다.</li><li style='margin-bottom: 8px;'><strong>서비스의 변경</strong><br />운영은 사전 통지 없이 서비스 내용을 변경 또는 중단할 수 있습니다.</li><li style='margin-bottom: 8px;'><strong>면책</strong><br />본 사이트의 이용으로 인해 발생한 어떤 손해에 대해서도 운영은 책임을 지지 않습니다.</li><li style='margin-bottom: 8px;'><strong>약관의 변경</strong><br />본 이용약관은 필요에 따라 변경될 수 있습니다.</li></ol>",
+  "termsContent": "<p>본 사이트를 이용함으로써 이용자는 본 이용약관에 동의한 것으로 간주됩니다.</p><br /><ol style='padding-left: 18px;'><li style='margin-bottom: 8px;'><strong>서비스 내용</strong><br />본 사이트는 크리에이터에 대한 투표 기능을 제공하는 서비스입니다.</li><li style='margin-bottom: 8px;'><strong>금지 행위</strong><br />이용자는 다음 행위를 해서는 안 됩니다:<ul><li>부정한 수단에 의한 투표</li><li>서비스 운영을 방해하는 행위</li><li>법령 또는 공서양속에 반하는 행위</li></ul></li><li style='margin-bottom: 8px;'><strong>투표에 대하여</strong><br />운영은 부정 투표 또는 부적절한 투표라고 판단한 경우 투표의 삭제 또는 조정을 할 권리를 가집니다.</li><li style='margin-bottom: 8px;'><strong>서비스의 변경</strong><br />운영은 사전 통지 없이 서비스 내용을 변경 또는 중단할 수 있습니다.</li><li style='margin-bottom: 8px;'><strong>면책</strong><br />본 사이트의 이용으로 인해 발생한 어떤 손해에 대해서도 운영은 책임을 지지 않습니다.</li><li style='margin-bottom: 8px;'><strong>약관의 변경</strong><br />본 이용약관은 필요에 따라 변경될 수 있습니다.</li></ol>",
   "unknownError": "알 수 없는 오류가 발생했습니다.",
   "backendLoginError": "로그인 중 서버 오류가 발생했습니다."
 }

@@ -15,7 +15,7 @@ import FloatingHeart from '../components/FloatingHeart';
 import { availableLanguages, languageNames } from '../i18n';
 
 const HomePage: React.FC = () => {
-  const { user, loading: authLoading, loginInfo, signInWithGoogle, getIdToken, refreshLoginInfo, loginError, clearLoginError } = useAuth();
+  const { user, loading: authLoading, loginInfo, signInWithGoogle, logout, getIdToken, refreshLoginInfo, loginError, clearLoginError } = useAuth();
   const { t, i18n } = useTranslation();
 
   const dayVotes = loginInfo?.dayVotes ?? 5;
@@ -547,8 +547,10 @@ const HomePage: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* ログインボタン（未ログイン時のみ） */}
-                      {!user && (
+                      {/* 言語選択とログイン・ログアウトの間の区切り線 */}
+                      <div className="my-2 border-t-[1px] border-gray-200" />
+                      {/* ログイン・ログアウトボタン */}
+                      {!user ? (
                         <button
                           type="button"
                           onClick={() => {
@@ -558,6 +560,17 @@ const HomePage: React.FC = () => {
                           className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-white/30 transition-colors duration-150"
                         >
                           {t('googleLoginButton')}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await logout();
+                            setShowUserMenu(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-white/30 transition-colors duration-150"
+                        >
+                          {t('googleLogoutButton', 'ログアウト')}
                         </button>
                       )}
                     </div>

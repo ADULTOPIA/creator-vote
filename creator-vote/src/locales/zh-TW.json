@@ -25,8 +25,9 @@
   "remaining": "剩餘",
   "votes": "票",
   "language": "語言",
-   "googleLoginButton": "使用 Google 帳戶登入",
-   "submitting": "送出中...",
+  "googleLoginButton": "使用 Google 帳戶登入",
+  "googleLogoutButton": "登出",
+  "submitting": "送出中...",
   "confirmVotesButton": "確認投票給 {{count}} 位創作者",
   "loginAndVoteButton": "登入並投票給 {{count}} 位創作者",
   "confirmVotesTitle": "確認您的投票嗎？",
@@ -45,7 +46,7 @@
   "termsTitle": "服務條款",
   "privacyTitle": "隱私政策",
   "privacyContent": "<ol style='padding-left: 18px;'><li style='margin-bottom: 8px;'><strong>蒐集的資訊</strong><br />本網站為提供服務，可能蒐集以下資訊：<br /><ul><li>透過 Google 登入取得的使用者識別資訊 (UID)</li><li>與服務使用相關的資訊（投票記錄等）</li><li>存取日誌、IP 位址等技術資訊</li></ul></li><li style='margin-bottom: 8px;'><strong>使用目的</strong><br />蒐集的資訊用於以下目的：<ul><li>使用者認證及帳戶管理</li><li>提供投票功能</li><li>改進服務及防止濫用</li><li>確保系統安全</li></ul></li><li style='margin-bottom: 8px;'><strong>使用的外部服務</strong><br />本網站使用以下外部服務：<br /><ul><li>Google Authentication（使用者認證）</li><li>Firebase（資料庫及基礎設施）</li></ul>這些服務提供者根據各自的隱私政策管理資訊。</li><li style='margin-bottom: 8px;'><strong>個人資訊的第三方揭露</strong><br />除法律規定外，本網站不會向第三方揭露蒐集的資訊。</li><li style='margin-bottom: 8px;'><strong>安全性</strong><br />本網站實施適當的安全措施以防止未授權存取及資訊洩露。</li><li style='margin-bottom: 8px;'><strong>隱私政策變更</strong><br />本政策內容可能根據需要進行變更。</li><li style='margin-bottom: 8px;'><strong>聯絡方式</strong><br />如對本政策有任何疑問，請聯絡本網站管理員。</li></ol>",
-  "termsContent": "<p>使用本網站即表示您同意本服務條款。</p><br /><ol style='padding-left: 18px;'><li style='margin-bottom: 8px;'><strong>服務描述</strong><br />本網站提供針對創作者的投票功能。</li><li style='margin-bottom: 8px;'><strong>禁止行為</strong><br />使用者不得從事以下行為：<ul><li>透過不當手段進行投票</li><li>透過多個帳戶操縱投票</li><li>干擾網站營運的行為</li><li>違反法律或公共秩序的行為</li></ul></li><li style='margin-bottom: 8px;'><strong>關於投票</strong><br />我們有權刪除或調整我們認定為詐欺或不當的投票。</li><li style='margin-bottom: 8px;'><strong>服務變更</strong><br />我們可能未經通知即變更或停止服務內容。</li><li style='margin-bottom: 8px;'><strong>免責聲明</strong><br />對於使用本網站所造成的任何損害，我們不承擔責任。</li><li style='margin-bottom: 8px;'><strong>條款變更</strong><br />本服務條款可能根據需要進行變更。</li></ol>",
+  "termsContent": "<p>使用本網站即表示您同意本服務條款。</p><br /><ol style='padding-left: 18px;'><li style='margin-bottom: 8px;'><strong>服務描述</strong><br />本網站提供針對創作者的投票功能。</li><li style='margin-bottom: 8px;'><strong>禁止行為</strong><br />使用者不得從事以下行為：<ul><li>透過不當手段進行投票</li><li>干擾網站營運的行為</li><li>違反法律或公共秩序的行為</li></ul></li><li style='margin-bottom: 8px;'><strong>關於投票</strong><br />我們有權刪除或調整我們認定為詐欺或不當的投票。</li><li style='margin-bottom: 8px;'><strong>服務變更</strong><br />我們可能未經通知即變更或停止服務內容。</li><li style='margin-bottom: 8px;'><strong>免責聲明</strong><br />對於使用本網站所造成的任何損害，我們不承擔責任。</li><li style='margin-bottom: 8px;'><strong>條款變更</strong><br />本服務條款可能根據需要進行變更。</li></ol>",
   "unknownError": "發生未知錯誤。",
   "backendLoginError": "登入時發生伺服器錯誤。"
 }
