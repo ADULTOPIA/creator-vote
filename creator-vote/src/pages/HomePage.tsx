@@ -404,7 +404,7 @@ const HomePage: React.FC = () => {
                 }}
                 className={`text-left ${cardRadiusClass} shadow-sm transition hover:shadow-md ${cardClass}`}
               >
-                <div className="overflow-hidden rounded-t-2xl aspect-[3/4] relative">
+                <div className="overflow-hidden rounded-t-2xl aspect-[9/16] relative">
                   <img
                     src={creator.imageUrl}
                     alt={creator.displayName}
