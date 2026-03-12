@@ -392,13 +392,53 @@ const HomePage: React.FC = () => {
                 }}
                 className={`text-left ${cardRadiusClass} shadow-sm transition hover:shadow-md ${cardClass}`}
               >
-                <div className="overflow-hidden rounded-t-2xl aspect-[9/16] relative">
-                  <img
-                    src={creator.imageUrl}
-                    alt={creator.displayName}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
+                    <div className="overflow-hidden rounded-t-2xl aspect-[9/16] relative">
+                      <img
+                        src={creator.imageUrl}
+                        alt={creator.displayName}
+                        className="h-full w-full object-cover"
+                      />
+                      {creator.snsLink ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              try {
+                                window.open(creator.snsLink, '_blank', 'noopener,noreferrer');
+                              } catch (err) {
+                                // fallback
+                                if (creator.snsLink) {
+                                  window.location.href = creator.snsLink;
+                                }
+                              }
+                            }}
+                            aria-label="Open creator SNS"
+                            className="absolute top-2 right-2 bg-transparent rounded-full p-0 flex items-center justify-center w-8 h-8"
+                          >
+                            <span className="rounded-full w-8 h-8 flex items-center justify-center border-2 border-white bg-transparent" style={{ boxShadow: '0 0 10px rgba(0,0,0,0.3)' }}>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 512 512"
+                                className="w-4 h-4 text-white"
+                                style={{ filter: 'drop-shadow(0 0 4px rgba(0, 0, 0, 0.8))' }}
+                                role="img"
+                                aria-hidden="false"
+                                focusable="false"
+                              >
+                                <g>
+                                  <path fill="currentColor" d="M256.732,145.122c40.064,0,72.557-32.492,72.557-72.557C329.289,32.476,296.796,0,256.732,0
+        c-40.073,0-72.565,32.476-72.565,72.565C184.167,112.629,216.659,145.122,256.732,145.122z" />
+                                  <path fill="currentColor" d="M345.668,453.857h-9.864c-10.091,0-18.282-8.182-18.282-18.282V188.209c0-3.356-1.754-6.476-4.639-8.214
+        c-2.86-1.739-6.435-1.82-9.401-0.26l-124.678,69.291c-36.279,18.135-18.875,39.796-5.363,39.252
+        c13.504-0.56,53.731-4.517,53.731-4.517v151.816c0,10.1-8.19,18.282-18.281,18.282h-19.362c-5.045,0-9.14,4.095-9.14,9.14v39.87
+        c0,5.038,4.095,9.133,9.14,9.133h156.139c5.046,0,9.141-4.095,9.141-9.133v-39.87C354.81,457.952,350.714,453.857,345.668,453.857z" />
+                                </g>
+                              </svg>
+                            </span>
+                          </button>
+                      ) : null}
+                    </div>
                 <div className="px-3 py-3">
                   <h3 className="text-sm font-semibold md:text-base text-gray-800">{creator.displayName}</h3>
                   <div className="flex items-center justify-between gap-1">
