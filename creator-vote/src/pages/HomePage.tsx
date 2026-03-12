@@ -308,7 +308,6 @@ const HomePage: React.FC = () => {
             });
         }
       } else {
-        // Try to detect structured server error messages like { error: 'INTERNAL_ERROR' }
         let parsedCode: string | undefined;
         let displayText = t('votingError');
         if (error instanceof Error) {
@@ -404,6 +403,9 @@ const HomePage: React.FC = () => {
                             onClick={(e) => {
                               e.stopPropagation();
                               e.preventDefault();
+                              analytics.event('creator_sns_open', {
+                                creator_id: creator.creatorId,
+                              });
                               try {
                                 window.open(creator.snsLink, '_blank', 'noopener,noreferrer');
                               } catch (err) {
