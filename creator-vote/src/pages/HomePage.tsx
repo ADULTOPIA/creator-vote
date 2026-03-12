@@ -99,10 +99,8 @@ const HomePage: React.FC = () => {
 
         const fallbackMessage = error instanceof Error ? error.message : t('unknownError');
         // Track fetch error
-        analytics.event({
-          action: 'load_error',
-          category: 'errors',
-          label: fallbackMessage.substring(0, 50),
+        analytics.event('data_load_error', {
+          error_message: fallbackMessage.substring(0, 100),
         });
         setErrorMessage(fallbackMessage);
       } finally {
@@ -195,14 +193,9 @@ const HomePage: React.FC = () => {
     }
 
     // Track creator tap event
-    const creator = creators.find(c => c.creatorId === id);
-    if (creator) {
-      analytics.event({
-        action: 'creator_tap',
-        category: 'engagement',
-        label: creator.displayName,
-      });
-    }
+    analytics.event('creator_tap', {
+      creator_id: id,
+    });
 
     setSelectedIds(prev => {
       if (prev.includes(id)) {
@@ -224,10 +217,8 @@ const HomePage: React.FC = () => {
   const handleVoteClick = () => {
     if (newSelections.length === 0) return;
     // Track vote button click
-    analytics.event({
-      action: 'vote_button_click',
-      category: 'engagement',
-      value: newSelections.length,
+    analytics.event('vote_button_click', {
+      selected_count: newSelections.length,
     });
     setShowConfirmPopup(true);
   };
@@ -254,10 +245,8 @@ const HomePage: React.FC = () => {
       const result = await submitVotes(idToken, newSelections);
 
       // Track successful vote submission
-      analytics.event({
-        action: 'vote_submitted',
-        category: 'engagement',
-        value: result.acceptedCreatorIds.length,
+      analytics.event('vote_submitted', {
+        vote_count: result.acceptedCreatorIds.length,
       });
 
       setLockedIds(prev => [...prev, ...result.acceptedCreatorIds]);
@@ -271,10 +260,9 @@ const HomePage: React.FC = () => {
     } catch (error) {
       if (error instanceof VoteApiError) {
         // Track voting errors
-        analytics.event({
-          action: 'vote_error',
-          category: 'errors',
-          label: `HTTP ${error.status}: ${error.code || 'unknown'}`,
+        analytics.event('vote_error', {
+          error_status: error.status,
+          error_name: error.code || 'unknown',
         });
         switch (error.status) {
           case 401:
@@ -527,10 +515,8 @@ const HomePage: React.FC = () => {
                               type="button"
                               onClick={async () => {
                                 // Track language selection event
-                                analytics.event({
-                                  action: 'language_changed',
-                                  category: 'engagement',
-                                  label: lang,
+                                analytics.event('language_changed', {
+                                  language_code: lang,
                                 });
                                 await i18n.changeLanguage(lang);
                                 setShowUserMenu(false);

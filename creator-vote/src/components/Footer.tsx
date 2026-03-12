@@ -37,10 +37,7 @@ const Footer = () => {
         <button
           style={{ background: 'none', border: 'none', color: '#575757', textDecoration: 'underline', cursor: 'pointer', fontSize: 14, padding: 0 }}
           onClick={() => {
-            analytics.event({
-              action: 'terms_button_click',
-              category: 'engagement',
-            });
+            analytics.event('terms_button_click');
             setShowTerms(true);
           }}
         >
@@ -49,10 +46,7 @@ const Footer = () => {
         <button
           style={{ background: 'none', border: 'none', color: '#575757', textDecoration: 'underline', cursor: 'pointer', fontSize: 14, padding: 0 }}
           onClick={() => {
-            analytics.event({
-              action: 'privacy_button_click',
-              category: 'engagement',
-            });
+            analytics.event('privacy_button_click');
             setShowPolicy(true);
           }}
         >
@@ -62,10 +56,7 @@ const Footer = () => {
         <button
           style={{ background: 'none', border: 'none', color: '#575757', textDecoration: 'underline', cursor: 'pointer', fontSize: 14, padding: 0 }}
           onClick={() => {
-            analytics.event({
-              action: 'mimictype_button_click',
-              category: 'engagement',
-            });
+            analytics.event('mimictype_button_click');
             window.open('https://mimictype.com/', '_blank', 'noopener,noreferrer');
           }}
         >
