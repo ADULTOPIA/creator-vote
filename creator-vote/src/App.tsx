@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import styled from 'styled-components';
@@ -12,6 +12,15 @@ import { theme } from './styles/theme';
 import { GlobalStyle } from './styles/GlobalStyle';
 import HomePage from './pages/HomePage';
 import analytics from './services/analytics';
+import Modal from './components/Modal';
+import { isWebView } from './utils/webViewDetector';
+
+const InstructionText = styled.p`
+  margin: 12px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: ${({ theme }) => theme.colors.black};
+`;
 
 const Main = styled.main`
   background-color: ${({ theme }) => theme.colors.white};
@@ -21,11 +30,49 @@ function AppContent() {
   const { t } = useTranslation();
   const faviconHref = `${process.env.PUBLIC_URL}/favicon.ico`;
   const location = useLocation();
+  const [showWebViewModal, setShowWebViewModal] = useState(false);
+  const [showCopySuccess, setShowCopySuccess] = useState(false);
+
+  useEffect(() => {
+    // WebView判定は一度だけ実行する
+    if (isWebView()) {
+      setShowWebViewModal(true);
+    }
+  }, []);
 
   useEffect(() => {
     const path = `${location.pathname}${location.search}${location.hash}`;
     analytics.pageview(path);
   }, [location]);
+
+  const handleCopyUrl = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      setShowWebViewModal(false);
+      setShowCopySuccess(true);
+    });
+  };
+
+  const handleCloseAll = () => {
+    setShowWebViewModal(false);
+    setShowCopySuccess(false);
+  };
+
+  const webViewButtons = [
+    {
+      label: t('copyUrlButton'),
+      onClick: handleCopyUrl,
+      variant: 'primary' as const,
+    },
+  ];
+
+  const copySuccessButtons = [
+    {
+      label: t('closeButton'),
+      onClick: handleCloseAll,
+      variant: 'primary' as const,
+    },
+  ];
 
   return (
     <>
@@ -44,6 +91,28 @@ function AppContent() {
           <Route path="/" element={<HomePage />} />
         </Routes>
       </Main>
+
+      {/* WebView案内モーダル - コピーボタン付き */}
+      <Modal
+        isOpen={showWebViewModal}
+        title={t('webViewTitle')}
+        buttons={webViewButtons}
+        onCancel={handleCloseAll}
+      >
+        <InstructionText>{t('webViewMessage')}</InstructionText>
+        <InstructionText>{t('webViewInstructions')}</InstructionText>
+        <InstructionText>{t('webViewFallback')}</InstructionText>
+      </Modal>
+
+      {/* コピー成功モーダル */}
+      <Modal
+        isOpen={showCopySuccess}
+        title={t('webViewCopySuccessTitle')}
+        buttons={copySuccessButtons}
+        onCancel={handleCloseAll}
+      >
+        <InstructionText>{t('webViewCopySuccessMessage')}</InstructionText>
+      </Modal>
     </>
   );
 }
