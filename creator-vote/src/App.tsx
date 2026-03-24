@@ -2,7 +2,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import styled from 'styled-components';
-import { Helmet } from 'react-helmet';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import i18n from './i18n';
 import { I18nextProvider } from 'react-i18next';
@@ -11,6 +11,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { theme } from './styles/theme';
 import { GlobalStyle } from './styles/GlobalStyle';
 import HomePage from './pages/HomePage';
+import AdminPage from './pages/AdminPage';
 import analytics from './services/analytics';
 import Modal from './components/Modal';
 import { isWebView } from './utils/webViewDetector';
@@ -89,6 +90,7 @@ function AppContent() {
       <Main>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </Main>
 
@@ -119,18 +121,20 @@ function AppContent() {
 
 function App() {
   return (
-    <I18nextProvider i18n={i18n}>
-      <Suspense fallback={<div />}>
-        <AuthProvider>
-          <ThemeProvider theme={theme}>
-            <GlobalStyle />
-            <Router>
-              <AppContent />
-            </Router>
-          </ThemeProvider>
-        </AuthProvider>
-      </Suspense>
-    </I18nextProvider>
+    <HelmetProvider>
+      <I18nextProvider i18n={i18n}>
+        <Suspense fallback={<div />}>
+          <AuthProvider>
+            <ThemeProvider theme={theme}>
+              <GlobalStyle />
+              <Router>
+                <AppContent />
+              </Router>
+            </ThemeProvider>
+          </AuthProvider>
+        </Suspense>
+      </I18nextProvider>
+    </HelmetProvider>
   );
 }
 
